@@ -1,802 +1,1892 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Youthful Heart FC — Team Profile</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b1220;
-      --card:#0f1724;
-      --muted:#94a3b8;
-      --accent:#10b981;
-      --glass: rgba(255,255,255,0.03);
-      --glass-2: rgba(255,255,255,0.02);
-      --danger: #ef4444;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background:linear-gradient(180deg,var(--bg),#071020 120%);
-      color:#e6edf3;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire Virtual - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Fullscreen Loader */
-    .loader-wrap{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg, rgba(2,6,23,0.9), rgba(6,10,18,0.95));
-      z-index:9999;
-      transition:opacity .45s ease,visibility .45s ease;
-    }
-    .loader-inner{
-      text-align:center;
-      backdrop-filter: blur(4px);
-      padding:22px;
-      border-radius:12px;
-      background:var(--glass);
-      box-shadow: 0 6px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    }
-    .loader-avatar{
-      width:120px;
-      height:120px;
-      border-radius:50%;
-      object-fit:cover;
-      display:block;
-      margin:0 auto 12px auto;
-      border:4px solid rgba(255,255,255,0.06);
-      animation:openClose 800ms ease-in-out infinite alternate;
-    }
-    .loader-title{
-      font-weight:700;
-      letter-spacing:0.4px;
-      font-size:18px;
-      margin-bottom:6px;
-    }
-    .loader-sub{color:var(--muted); font-size:13px}
+        :root {
+            --primary-dark: #1a1410;
+            --secondary-dark: #2d2420;
+            --accent-green: #10b981;
+            --accent-green-dark: #059669;
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #3d3430;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
 
-    @keyframes openClose{
-      0%{ transform: scale(0.92); opacity:0.68; filter:blur(0.6px) }
-      50%{ transform: scale(1.06); opacity:1; filter:blur(0) }
-      100%{ transform: scale(0.96); opacity:0.78; filter:blur(0.4px) }
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* Main container */
-    .container{
-      max-width:1100px;
-      margin:36px auto;
-      padding:20px;
-    }
-    .team-card{
-      display:flex;
-      gap:22px;
-      background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
-      border-radius:14px;
-      padding:18px;
-      align-items:center;
-      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-      border:1px solid rgba(255,255,255,0.03);
-    }
-    .team-image{
-      width:160px;
-      height:160px;
-      border-radius:12px;
-      overflow:hidden;
-      flex:0 0 160px;
-      border:3px solid rgba(255,255,255,0.03);
-    }
-    .team-image img{ width:100%; height:100%; object-fit:cover; display:block }
+        .form-type-header {
+            background: var(--accent-green);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
 
-    .team-info{ flex:1; display:flex; flex-direction:column; gap:8px }
-    .team-name{ font-size:22px; font-weight:700 }
-    .team-meta{ color:var(--muted); font-size:14px }
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .person {
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:8px 10px;
-      background:var(--glass-2);
-      border-radius:10px;
-      min-width:220px;
-    }
-    .person img{
-      width:44px;
-      height:44px;
-      border-radius:50%;
-      object-fit:cover;
-      border:2px solid rgba(255,255,255,0.04);
-    }
-    .person .p-title{font-weight:600}
-    .info-grid{
-      display:flex;
-      gap:18px;
-      flex-wrap:wrap;
-      margin-top:8px;
-    }
-    .info-block{
-      background:transparent;
-      border-radius:10px;
-      padding:12px;
-      min-width:220px;
-      color:var(--muted);
-      font-size:14px;
-    }
+        /* PIN Lock Screen Styles */
+        .pin-lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
 
-    /* Buttons */
-    .actions{ display:flex; gap:12px; margin-top:14px; flex-wrap:wrap }
-    .btn{
-      background:linear-gradient(180deg,#0ea5a0,#059669);
-      color:white;
-      border:none;
-      padding:10px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:600;
-      box-shadow:0 6px 18px rgba(4,120,87,0.14);
-      transition:transform .12s ease, opacity .12s;
-    }
-    .btn.secondary{
-      background:transparent;
-      border:1px solid rgba(255,255,255,0.06);
-      color:var(--muted);
-      box-shadow:none;
-    }
-    .btn.small{
-      padding:6px 10px;
-      font-size:13px;
-      border-radius:8px;
-    }
-    .btn:active{ transform:translateY(1px) }
-    .btn[disabled]{ opacity:0.6; cursor:progress }
+        .pin-lock-screen.hidden {
+            display: none !important;
+        }
 
-    /* Overlay / Modal */
-    .overlay{
-      position:fixed;
-      inset:0;
-      display:none;
-      background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.85));
-      align-items:center;
-      justify-content:center;
-      z-index:9998;
-    }
-    .overlay.show{ display:flex }
-    .modal{
-      width:92%;
-      max-width:720px;
-      max-height:86vh;
-      overflow:auto;
-      background: #071226;
-      border-radius:12px;
-      padding:16px;
-      border:1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 12px 40px rgba(2,6,23,0.7);
-      position:relative;
-    }
-    .modal .close{
-      position:absolute;
-      right:12px;
-      top:12px;
-      background:transparent;
-      border:none;
-      color:var(--muted);
-      font-size:22px;
-      cursor:pointer;
-    }
-    .modal .modal-head{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .modal .controls{ display:flex; gap:8px; align-items:center }
+        .pin-container {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
 
-    .list { display:flex; flex-direction:column; gap:10px; margin-top:10px }
-    .player {
-      display:flex;
-      gap:12px;
-      align-items:center;
-      background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.02);
-    }
-    .player img{ width:46px; height:46px; border-radius:50%; object-fit:cover }
-    .player .meta{ color:var(--muted); font-size:13px }
-    .fixture{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-      padding:10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.02);
-    }
-    .teammini{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      min-width:180px;
-    }
-    .teammini img{ width:56px; height:56px; border-radius:8px; object-fit:cover }
-    .odds{ margin-left:auto; text-align:right; color:var(--muted) }
+        .pin-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
 
-    .notice{
-      padding:18px;
-      border-radius:10px;
-      background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      color:var(--muted);
-      text-align:center;
-    }
+        .pin-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
 
-    /* Compact variants (fixtures & results & terms) */
-    .fixture.compact{
-      flex-direction:column;
-      align-items:stretch;
-      gap:12px;
-    }
-    .fixture.compact .teammini{
-      min-width:unset;
-      justify-content:flex-start;
-    }
-    .fixture.compact .teammini img{ width:48px; height:48px; border-radius:8px }
-    .fixture.compact .odds{ margin-left:0; text-align:left; }
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-    .fixture.compact .vs{
-      display:flex;
-      justify-content:center;
-      width:100%;
-      color:var(--muted);
-      font-weight:700;
-      margin:0;
-    }
+        .pin-digit {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+            transition: all 0.2s;
+        }
 
-    .past-compact {
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .past-compact .result-row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      padding:10px;
-      border-radius:10px;
-      background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-      border:1px solid rgba(255,255,255,0.02);
-    }
-    .past-compact .team{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .past-compact .team img{ width:44px; height:44px; border-radius:8px }
+        .pin-digit.active {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
 
-    /* Modal loader */
-    .modal-loader{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-      flex-direction:column;
-      color:var(--muted);
-    }
-    .dots {
-      display:flex;
-      gap:6px;
-      align-items:center;
-    }
-    .dot{
-      width:10px;
-      height:10px;
-      background:var(--accent);
-      border-radius:50%;
-      opacity:0.85;
-      transform:scale(0.9);
-      animation:dotPulse 900ms infinite ease-in-out;
-    }
-    .dot:nth-child(2){ animation-delay:120ms; background:#34d399 }
-    .dot:nth-child(3){ animation-delay:240ms; background:#60a5fa }
-    @keyframes dotPulse{
-      0%{ transform:scale(0.72); opacity:0.6 }
-      50%{ transform:scale(1.15); opacity:1 }
-      100%{ transform:scale(0.72); opacity:0.6 }
-    }
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-    footer{ text-align:center; color:var(--muted); margin-top:22px; font-size:13px }
+        .pin-key {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    /* Responsive */
-    @media (max-width:720px){
-      .team-card{ flex-direction:column; align-items:flex-start }
-      .team-image{ width:100%; height:220px; flex:unset; border-radius:12px }
-      .person{ min-width:unset }
-      .teammini img{ width:44px; height:44px }
-      .modal{ max-width:96%; padding:12px }
-    }
-  </style>
+        .pin-key:hover {
+            background: var(--secondary-dark);
+            border-color: var(--accent-green);
+        }
+
+        .pin-key:active {
+            transform: scale(0.95);
+        }
+
+        .pin-key.delete {
+            grid-column: span 3;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .pin-key.delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .pin-error {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .pin-error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dashboard.hidden {
+            display: none !important;
+        }
+
+        .header {
+            background: var(--secondary-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--accent-green);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(20deg);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .profile-section {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: var(--primary-dark);
+            border: 3px solid var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .profile-name:hover {
+            color: var(--accent-green);
+        }
+
+        .profile-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            height: 18px;
+        }
+
+        .profile-date.hidden {
+            display: none !important;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-container.hidden {
+            display: none !important;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--primary-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .next-balance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--primary-dark);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        .next-balance-label.hidden {
+            display: none !important;
+        }
+
+        .next-balance-value {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Timer Modal Styles */
+        .timer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .timer-modal.show {
+            display: flex;
+        }
+
+        .timer-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px 25px;
+            max-width: 380px;
+            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .timer-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--accent-green);
+        }
+
+        .timer-section {
+            margin-bottom: 30px;
+        }
+
+        .timer-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timer-box {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .timer-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .timer-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .countdown-item {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .countdown-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .countdown-unit {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .expiry-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 11px;
+            color: var(--danger);
+            text-align: center;
+        }
+
+        .timer-close {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .timer-close:hover {
+            background: var(--accent-green-dark);
+        }
+
+        /* Buttons */
+        .buttons-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-secondary {
+            background: var(--primary-dark);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        /* Menu */
+        .menu-section {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            padding-left: 25px;
+        }
+
+        .menu-item-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .menu-item-icon {
+            font-size: 16px;
+            color: var(--accent-green);
+            width: 20px;
+        }
+
+        .menu-item-arrow {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px;
+            width: 100%;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .form-input:disabled {
+            background: var(--secondary-dark);
+            color: var(--text-muted);
+        }
+
+        .pin-input-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pin-input-box {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .pin-input-box:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9000;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(16, 185, 129, 0.2);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Settings */
+        .settings-item {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+        }
+
+        .settings-label {
+            color: var(--text-muted);
+            font-size: 11px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .settings-value {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* Referral */
+        .referral-card {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .referral-code {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .referral-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .referral-progress {
+            background: var(--secondary-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 6px;
+            margin-bottom: 10px;
+        }
+
+        .referral-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
+            transition: width 0.5s ease;
+        }
+
+        .referral-bonus-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 8px;
+            background: var(--secondary-dark);
+            border-radius: 6px;
+        }
+
+        .referral-bonus-value {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Instructions */
+        .instructions-list {
+            list-style: none;
+        }
+
+        .instructions-list li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        .instructions-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .expired-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .trade-time-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .trade-info-box {
+            background: var(--primary-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .trade-info-box strong {
+            color: var(--accent-green);
+        }
+    </style>
 </head>
 <body>
-
-  <!-- Fullscreen initial loader (6 seconds) -->
-  <div id="loader" class="loader-wrap" role="status" aria-label="Loading content">
-    <div class="loader-inner" aria-hidden="false">
-      <!-- Replace ./assets/your-image.jpg with your actual image file path; fallback will be used if missing -->
-      <img id="loaderAvatar" class="loader-avatar" src="AddText_10-27-09.04.08.png" alt="Loader image" onerror="this.src='AddText_10-27-09.04.08.png">
-      <div class="loader-title">Youthful Health FC</div>
-      <div class="loader-sub">Preparing the squad... this will take about 6 seconds</div>
-    </div>
-  </div>
-
-  <main class="container" id="app" aria-live="polite" style="opacity:0; transform:translateY(8px); transition:all .5s ease;">
-    <div class="team-card" role="region" aria-labelledby="teamTitle">
-      <div class="team-image" aria-hidden="false">
-        <img id="teamImg" src="AddText_10-27-09.04.08.png" alt="Team image">
-      </div>
-      <div class="team-info">
-        <div id="teamTitle" class="team-name">Youthful Heart FC</div>
-        <div class="team-meta">Founded: <span id="founded">2025</span></div>
-
-        <div class="info-grid">
-          <div class="person" title="Head Coach">
-            <img id="headCoachImg" src="https://i.pravatar.cc/100?img=12" alt="Head coach">
-            <div>
-              <div class="p-title">Head Coach</div>
-              <div class="p-sub" id="headCoach">Marcus Osei</div>
+    <!-- PIN LOCK SCREEN -->
+    <div class="pin-lock-screen" id="pinLockScreen">
+        <div class="pin-container">
+            <h1 class="pin-title">EmpireStateBank</h1>
+            <p class="pin-subtitle">Enter your 4-digit PIN</p>
+            <div class="pin-display" id="pinDisplay">
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
+                <div class="pin-digit"></div>
             </div>
-          </div>
-
-          <div class="person" title="Assistant Coach">
-            <img id="asstCoachImg" src="https://i.pravatar.cc/100?img=13" alt="Assistant coach">
-            <div>
-              <div class="p-title">Assistant Coach</div>
-              <div class="p-sub" id="asstCoach">Lydia Mensah</div>
+            <div class="pin-keypad">
+                <button class="pin-key" data-key="1">1</button>
+                <button class="pin-key" data-key="2">2</button>
+                <button class="pin-key" data-key="3">3</button>
+                <button class="pin-key" data-key="4">4</button>
+                <button class="pin-key" data-key="5">5</button>
+                <button class="pin-key" data-key="6">6</button>
+                <button class="pin-key" data-key="7">7</button>
+                <button class="pin-key" data-key="8">8</button>
+                <button class="pin-key" data-key="9">9</button>
+                <button class="pin-key" data-key="0">0</button>
+                <button class="pin-key delete"><i class="fas fa-backspace"></i></button>
             </div>
-          </div>
-
-          <div class="person" title="Captain">
-            <img id="captainImg" src="https://i.pravatar.cc/100?img=14" alt="Captain">
-            <div>
-              <div class="p-title">Captain</div>
-              <div class="p-sub" id="captain">Samuel Boateng</div>
+            <div class="pin-error" id="pinError">
+                <i class="fas fa-exclamation-circle"></i> Incorrect PIN
             </div>
-          </div>
-
-          <div class="person" title="Assistant Captain">
-            <img id="asstCapImg" src="https://i.pravatar.cc/100?img=15" alt="Assistant Captain">
-            <div>
-              <div class="p-title">Assistant Captain</div>
-              <div class="p-sub" id="asstCaptain">Irene Adom</div>
-            </div>
-          </div>
         </div>
-
-        <div class="row" style="margin-top:8px">
-          <div class="info-block">
-            <div style="font-weight:700">Stadium</div>
-            <div id="stadium" class="team-meta">Youthful Arena — Piaco Field</div>
-          </div>
-
-          <div class="info-block">
-            <div style="font-weight:700">Training</div>
-            <div id="training" class="team-meta">Fridays — 15:00 to 17:00</div>
-          </div>
-
-        </div>
-
-        <div class="actions">
-          <button id="btnPlayers" class="btn">Show Players</button>
-          <button id="btnFixture" class="btn secondary">Next Fixture</button>
-          <button id="btnResults" class="btn secondary">Past Results</button>
-          <button id="btnTerms" class="btn secondary">Terms &amp; Conditions</button>
-        </div>
-      </div>
     </div>
-  </main>
 
-  <!-- Overlay / Modal -->
-  <div id="overlay" class="overlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="close" id="modalClose" aria-label="Close">&times;</button>
-      <div id="modalContent">
-        <!-- Content populated dynamically -->
-      </div>
+    <!-- MAIN DASHBOARD -->
+    <div class="dashboard hidden" id="dashboard">
+        <div class="header">
+            <div class="header-title">Dashboard</div>
+            <button class="settings-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+        <div class="content">
+            <div class="profile-section">
+                <div class="profile-image" id="profileImage"><i class="fas fa-user"></i></div>
+                <div class="profile-name" id="profileName"><span>Loading</span><span>></span></div>
+                <div class="profile-date" id="nextPaymentDate"></div>
+                <div class="balance-card">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-amount" id="balanceAmount">₦0.00</div>
+                </div>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-label">
+                        <span>Progress to Next Payment</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="next-balance-label" id="nextBalanceContainer">
+                        Next Balance: <span class="next-balance-value" id="nextBalanceAmount">₦0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-section">
+                <button class="btn btn-primary" id="depositBtn"><i class="fas fa-arrow-down"></i> Deposit</button>
+                <button class="btn btn-secondary" id="withdrawBtn"><i class="fas fa-arrow-up"></i> Withdraw</button>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-item" id="tradeNowItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-chart-line"></i></span><span>Trade Now</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="withdrawalRecordsItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-history"></i></span><span>Withdrawal Records</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="referralsItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-users"></i></span><span>Referrals</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="sportybetItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-share-alt"></i></span><span>SportybetSocial</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="customerServiceItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-headset"></i></span><span>Customer Service</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="notificationItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-bell"></i></span><span>Notification Center</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="howToPlayItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-question-circle"></i></span><span>How to play</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="menu-item" id="shareIdeaItem">
+                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-lightbulb"></i></span><span>Share an Idea</span></div>
+                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+            </div>
+            <button class="btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Quick global error handler to avoid loader getting stuck on unexpected runtime errors.
-    window.addEventListener('error', (ev) => {
-      console.error('Unhandled error:', ev.error || ev.message);
-      const loader = document.getElementById('loader');
-      const app = document.getElementById('app');
-      if (loader) {
-        loader.style.opacity = 0;
-        loader.style.visibility = 'hidden';
-        loader.setAttribute('aria-hidden', 'true');
-      }
-      if (app) {
-        app.style.opacity = 1;
-        app.style.transform = 'translateY(0)';
-      }
-    });
+    <!-- TIMER MODAL -->
+    <div class="timer-modal" id="timerModal">
+        <div class="timer-content">
+            <div class="timer-title">⏳ Account Status</div>
+            
+            <div class="timer-section">
+                <div class="timer-section-title">🚀 Activated On</div>
+                <div class="timer-box">
+                    <div class="timer-label">Activation Date & Time</div>
+                    <div class="timer-value" id="activationDateTimeDisplay">-- -- ----</div>
+                </div>
+            </div>
 
-    // Sample data
-    const TEAM = {
-      name: "Youthful Heart FC",
-      founded: 2025,
-      image: "AddText_10-27-09.04.08.png",
-      stadium: { name: "Youthful Arena", location: "Piaco Field" },
-      training: "Friday — 15:00 to 17:00",
-      headCoach: { name: "Marcus Osei", img: "https://i.pravatar.cc/100?img=12" },
-      assistantCoach: { name: "Lydia Mensah", img: "https://i.pravatar.cc/100?img=13" },
-      captain: { name: "Samuel Boateng", img: "https://i.pravatar.cc/100?img=14" },
-      assistantCaptain: { name: "Irene Adom", img: "https://i.pravatar.cc/100?img=15" },
-    };
+            <div class="timer-section">
+                <div class="timer-section-title">⏱️ Active Duration</div>
+                <div class="countdown-grid">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeDays">0</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeHours">0</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeMinutes">0</div>
+                        <div class="countdown-unit">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="activeSeconds">0</div>
+                        <div class="countdown-unit">Seconds</div>
+                    </div>
+                </div>
+            </div>
 
-    const PLAYERS = [
-      { name:"Kwame Appiah", number:1, position:"GK", img:"https://i.pravatar.cc/100?img=21" },
-      { name:"Daniel K.", number:4, position:"DF", img:"https://i.pravatar.cc/100?img=22" },
-      { name:"Emmanuel P.", number:7, position:"MF", img:"https://i.pravatar.cc/100?img=23" },
-      { name:"Joseph T.", number:9, position:"FW", img:"https://i.pravatar.cc/100?img=24" },
-      { name:"Rita S.", number:11, position:"MF", img:"https://i.pravatar.cc/100?img=25" },
-      { name:"Michael N.", number:6, position:"DF", img:"https://i.pravatar.cc/100?img=26" }
-    ];
+            <div class="timer-section">
+                <div class="timer-section-title">⏳ Countdown to Expiry</div>
+                <div class="timer-box">
+                    <div class="timer-label">Expiry Date & Time</div>
+                    <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
+                </div>
+                <div class="countdown-grid">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryDays">0</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryHours">0</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expiryMinutes">0</div>
+                        <div class="countdown-unit">Minutes</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="expirySeconds">0</div>
+                        <div class="countdown-unit">Seconds</div>
+                    </div>
+                </div>
+            </div>
 
-    // Next fixture (set to null to show "no fixture" notice)
-    const NEXT_FIXTURE = {
-      home: { name: "Youthful Heart FC", img: TEAM.image },
-      away: { name: "The Rock FC", img: "AddText_07-18-06.02.36.png" },
-      odds: { home: 2.90, draw: 3.35, away: 2.25 }, // decimal odds 1X2
-      // Fixed string concatenation for venue
-      venue: TEAM.stadium.name + " — " + TEAM.stadium.location,
-      date: "2025-12-05",
-      time: "15:00"
-    };
+            <div class="expiry-warning" id="expiryWarning" style="display: none;">
+                ⚠️ Your account has expired. Please renew your subscription.
+            </div>
 
-    // Past results
-    const PAST_RESULTS = [
-      {
-        home: { name: "Youthful Heart FC", img: TEAM.image },
-        away: { name: "Pinn margaret", img: "AddText_11-14-05.51.30.png" },
-        ht: "4-3",
-        ft: "5-6",
-        date: "2025-11-14"
-      }
-    ];
+            <button class="timer-close" id="timerClose">Close</button>
+        </div>
+    </div>
 
-    // DOM wiring
-    document.addEventListener("DOMContentLoaded", () => {
-      try {
-        // populate team info
-        document.getElementById("teamImg").src = TEAM.image;
-        document.getElementById("founded").textContent = TEAM.founded;
-        document.getElementById("stadium").textContent = TEAM.stadium.name + " — " + TEAM.stadium.location;
-        document.getElementById("training").textContent = TEAM.training;
-        document.getElementById("headCoach").textContent = TEAM.headCoach.name;
-        document.getElementById("headCoachImg").src = TEAM.headCoach.img;
-        document.getElementById("asstCoach").textContent = TEAM.assistantCoach.name;
-        document.getElementById("asstCoachImg").src = TEAM.assistantCoach.img;
-        document.getElementById("captain").textContent = TEAM.captain.name;
-        document.getElementById("captainImg").src = TEAM.captain.img;
-        document.getElementById("asstCaptain").textContent = TEAM.assistantCaptain.name;
-        document.getElementById("asstCapImg").src = TEAM.assistantCaptain.img;
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Account Details</div>
+                <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="settingsContent"></div>
+        </div>
+    </div>
 
-        // buttons
-        const btnPlayers = document.getElementById("btnPlayers");
-        const btnFixture = document.getElementById("btnFixture");
-        const btnResults = document.getElementById("btnResults");
-        const btnTerms = document.getElementById("btnTerms");
-        btnPlayers.addEventListener("click", () => openWithLoading(showPlayers));
-        btnFixture.addEventListener("click", () => openWithLoading(showFixtureCompact));
-        btnResults.addEventListener("click", () => openWithLoading(showResultsCompact));
-        btnTerms.addEventListener("click", () => openWithLoading(showTermsCompact));
+    <!-- WITHDRAW MODAL -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Withdraw Funds</div>
+                <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="form-type-header">📋 WITHDRAWAL FORM</div>
+            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Withdrawal Form Submission">
+                <input type="hidden" name="_template" value="table">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Account Number</label>
+                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bank Name</label>
+                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Account Name</label>
+                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₦)</label>
+                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="withdrawDate" name="Date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN</label>
+                    <div class="pin-input-grid">
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
+                    </div>
+                    <input type="hidden" id="withdrawPinHidden" name="PIN">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Submit</button>
+            </form>
+            <div class="expired-warning" id="withdrawWarning" style="display: none;">Withdrawals only available Mondays 08:00-10:00 UTC</div>
+        </div>
+    </div>
 
-        // modal close
-        document.getElementById("modalClose").addEventListener("click", closeModal);
-        document.getElementById("overlay").addEventListener("click", (e) => {
-          if(e.target === document.getElementById("overlay")) closeModal();
+    <!-- TRADE NOW MODAL -->
+    <div class="modal" id="tradeNowModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Trade Now</div>
+                <button class="modal-close" onclick="closeModal('tradeNowModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="form-type-header">📊 TRADE FORM</div>
+            <div class="trade-time-warning" id="tradeTimeWarning" style="display: none;">
+                <i class="fas fa-clock"></i> Trading is only available on your assigned day between 08:00-10:00 UTC and can only be processed if your account has been activated
+            </div>
+            <div class="trade-info-box" id="tradeInfoBox">
+                Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
+            </div>
+            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Trade Form Submission">
+                <input type="hidden" name="_template" value="table">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="tradeName" name="Full_Name" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
+                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000">
+                    <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="tradeDate" name="Date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN</label>
+                    <div class="pin-input-grid">
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
+                    </div>
+                    <input type="hidden" id="tradePinHidden" name="Trade_PIN">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- REFERRALS MODAL -->
+    <div class="modal" id="referralsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">My Referrals</div>
+                <button class="modal-close" onclick="closeModal('referralsModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="referral-card">
+                <div class="referral-code" id="referralCode">XXXX</div>
+                <div class="referral-count" id="referralCountText">0 / 10</div>
+                <div class="referral-progress"><div class="referral-fill" id="referralFill" style="width: 0%"></div></div>
+                <div class="referral-bonus-label">Bonus: <span class="referral-bonus-value" id="referralBonusAmount">₦0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div class="modal" id="howToPlayModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">How to Play</div>
+                <button class="modal-close" onclick="closeModal('howToPlayModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <ul class="instructions-list">
+                <li>Login with your 4-digit PIN</li>
+                <li>Check your balance and payment dates</li>
+                <li>Use Deposit to fund your account</li>
+                <li>Withdraw on Mondays 08:00-10:00 UTC</li>
+                <li>Trade on your assigned day 08:00-10:00 UTC</li>
+                <li>Trade amounts: ₦5,000 - ₦20,000</li>
+                <li>Earn bonuses with referrals</li>
+                <li>Your trade can only be processed if your account has been activated</li>
+                <li>Contact support for help</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- WITHDRAWAL DETAILS MODAL -->
+    <div class="modal" id="withdrawalDetailsModal">
+        <div class="modal-content" style="max-width: 400px; border-radius: 15px;">
+            <div class="modal-header">
+                <div class="modal-title">Last Withdrawal</div>
+                <button class="modal-close" onclick="closeModal('withdrawalDetailsModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="withdrawalDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- LOADER -->
+    <div class="loader-overlay" id="loaderOverlay"><div class="spinner"></div></div>
+
+    <script>
+        const EXTERNAL_LINKS = {
+            sportybet: 'https://www.sportybet.com/player/empirebot',
+            shareIdea: 'https://chat.whatsapp.com/KuZ1TT07hDrEbFlMUKrqaE',
+            notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
+            customerService: 'mailto:empirevirtual99@gmail.com'
+        };
+
+        const users = {
+            '2255': {
+                fullName: 'OWAN SILAS',
+                pin: '2255',
+                balance: 50000,
+                nextBalance: 50000,
+                nextPaymentDate: '2026-03-14T00:00:00Z',
+                activationDate: '2025-11-25T08:30:00Z',
+                expiryDate: '2026-05-25T23:59:59Z',
+                tradeDate: 15,
+                bankDetails: {
+                    accountNumber: '3212525772',
+                    bankName: 'First Bank',
+                    accountName: 'OWAN SILAS OWAN',
+                    phone: '09037404875'
+                },
+                referral: {
+                    code: 'SILAS1241',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_11-25-06.08.39.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260408-5001',
+                    amount: 25000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-08T19:21:22Z')
+                }
+            },
+            '1220': {
+                fullName: 'SAVIOUR EKONG',
+                pin: '1220',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-03-30T00:00:00Z',
+                activationDate: '2024-11-15T14:20:00Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 20,
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAVIOUR EKONG',
+                    phone: '08033456789'
+                },
+                referral: {
+                    code: 'EKONG5410',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-29-09.19.44.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260407-1220',
+                    amount: 3500,
+                    status: 'pending',
+                    method: 'Wallet',
+                    date: new Date('2026-04-07T09:45:00Z')
+                }
+            },
+            '3572': {
+                fullName: 'EMMANUEL EKPA',
+                pin: '3572',
+                balance: 10000,
+                nextBalance: 20000,
+                nextPaymentDate: '2026-05-25T20:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2026-07-15T23:59:59Z',
+                tradeDate: 15,
+                bankDetails: {
+                    accountNumber: '8145300013',
+                    bankName: 'F.C.M.B',
+                    accountName: 'EMMANUEL EMMANUEL EKPA',
+                    phone: '08105866469'
+                },
+                referral: {
+                    code: 'EKPA9014',
+                    count: 5,
+                    bonus: 2500
+                },
+                profileImage: 'AddText_05-22-01.29.33.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260405-3572',
+                    amount: 5000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-05T14:30:15Z'),
+                    failureReason: 'Insufficient funds'
+                }
+            },
+            '5012': {
+                fullName: 'SAMUEL AKPAN',
+                pin: '5012',
+                balance: 17000,
+                nextBalance: 17000,
+                nextPaymentDate: '2025-03-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '2309320542',
+                    bankName: 'UBA',
+                    accountName: 'SAMUEL MONDAY AKPAN',
+                    phone: '09138109857'
+                },
+                referral: {
+                    code: 'AKPAN7080',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_06-03-08.29.58.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260403-5012',
+                    amount: 8500,
+                    status: 'failed',
+                    method: 'Wallet',
+                    date: new Date('2026-04-03T11:20:00Z'),
+                    failureReason: 'Insufficient funds'
+                }
+            },
+            '1908': {
+                fullName: 'USHIE ONEN',
+                pin: '1908',
+                balance: 3000,
+                nextBalance: 3000,
+                nextPaymentDate: '2025-03-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '2061660821',
+                    bankName: 'UBA',
+                    accountName: 'USHIE IKPI ONEN',
+                    phone: '07032325480'
+                },
+                referral: {
+                    code: 'ONEN4515',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_06-05-09.14.49.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260402-1908',
+                    amount: 1500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-04-02T16:45:30Z')
+                }
+            },
+            '2019': {
+                fullName: 'CHARITY HANSON',
+                pin: '2019',
+                balance: 9000,
+                nextBalance: 9000,
+                nextPaymentDate: '2025-10-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '2266867085',
+                    bankName: 'UBA',
+                    accountName: 'CHARITY ASUQUO HANSON',
+                    phone: '08028803872'
+                },
+                referral: {
+                    code: 'HANSON9961',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_06-02-03.50.45.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260401-2019',
+                    amount: 4500,
+                    status: 'pending',
+                    method: 'Wallet',
+                    date: new Date('2026-04-01T10:15:00Z')
+                }
+            },
+            '1266': {
+                fullName: 'SAMUEL IME',
+                pin: '1266',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-25T17:10:00Z',
+                activationDate: '2024-11-15T10:15:30Z',
+                expiryDate: '2025-07-15T23:59:59Z',
+                tradeDate: 13,
+                bankDetails: {
+                    accountNumber: '2311076735',
+                    bankName: 'Ekobank',
+                    accountName: 'SAMUEL IME',
+                    phone: '08012345678'
+                },
+                referral: {
+                    code: 'IME0109',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-22-09.03.57.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260331-1266',
+                    amount: 3500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-31T13:25:45Z')
+                }
+            },
+            '4073': {
+                fullName: 'ESTHER AMOS',
+                pin: '4073',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-30T17:10:00Z',
+                activationDate: '2024-06-25T10:15:30Z',
+                expiryDate: '2026-01-15T23:59:59Z',
+                tradeDate: 1,
+                bankDetails: {
+                    accountNumber: '4301808534',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ESTHER EKERETTE AMOS',
+                    phone: '08130024073'
+                },
+                referral: {
+                    code: 'AMOS8068',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-25-10.37.46.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260330-4073',
+                    amount: 2000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-30T08:50:12Z')
+                }
+            },
+            '1313': {
+                fullName: 'ITOHOWO AKAN',
+                pin: '1313',
+                balance: 7000,
+                nextBalance: 7000,
+                nextPaymentDate: '2025-10-30T17:10:00Z',
+                activationDate: '2024-06-01T10:15:30Z',
+                expiryDate: '2026-01-01T23:59:59Z',
+                tradeDate: 3,
+                bankDetails: {
+                    accountNumber: '2088350310',
+                    bankName: 'Zenith Bank',
+                    accountName: 'ITOHOWO JOHN AKAN',
+                    phone: '08036241336'
+                },
+                referral: {
+                    code: 'AKAN1001',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_05-25-10.37.07.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260329-1313',
+                    amount: 5500,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-29T15:35:28Z')
+                }
+            },
+            '1995': {
+                fullName: 'DANIEL JOHNSON',
+                pin: '1995',
+                balance: 9000,
+                nextBalance: 9000,
+                nextPaymentDate: '2026-01-23T17:10:00Z',
+                activationDate: '2025-12-23T10:15:30Z',
+                expiryDate: '2026-04-01T23:59:59Z',
+                tradeDate: 24,
+                bankDetails: {
+                    accountNumber: '6552242407',
+                    bankName: 'Fidelity Bank',
+                    accountName: 'DANIEL IME JOHNSON',
+                    phone: '08106122713'
+                },
+                referral: {
+                    code: 'JOHNSON6090',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_12-23-12.28.07.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260328-1995',
+                    amount: 6000,
+                    status: 'pending',
+                    method: 'Wallet',
+                    date: new Date('2026-03-28T12:00:00Z')
+                }
+            },
+            '2027': {
+                fullName: 'EKE JAMES',
+                pin: '2027',
+                balance: 6000,
+                nextBalance: 6000,
+                nextPaymentDate: '2026-01-10T17:10:00Z',
+                activationDate: '2026-01-11T10:15:30Z',
+                expiryDate: '2026-05-11T23:59:59Z',
+                tradeDate: 13,
+                bankDetails: {
+                    accountNumber: '6671258114',
+                    bankName: 'Fidelity Bank',
+                    accountName: 'EKE JAMES ELE',
+                    phone: '09167655099'
+                },
+                referral: {
+                    code: 'ELE0098',
+                    count: 0,
+                    bonus: 0
+                },
+                profileImage: 'AddText_01-11-09.57.24.png',
+                lastWithdrawal: {
+                    id: 'TXN-20260327-2027',
+                    amount: 3000,
+                    status: 'successful',
+                    method: 'Wallet',
+                    date: new Date('2026-03-27T09:30:45Z')
+                }
+            }
+        };
+
+        let currentUser = null;
+        let pinInput = '';
+        let timerInterval = null;
+
+        // PIN ENTRY EVENT LISTENERS
+        document.querySelectorAll('.pin-key').forEach(key => {
+            key.addEventListener('click', function() {
+                const value = this.getAttribute('data-key');
+                if (this.classList.contains('delete')) {
+                    pinInput = pinInput.slice(0, -1);
+                } else if (pinInput.length < 4) {
+                    pinInput += value;
+                }
+                updatePinDisplay();
+                if (pinInput.length === 4) validatePin();
+            });
         });
 
-        // initial fullscreen loader (6s)
-        const loader = document.getElementById("loader");
-        const app = document.getElementById("app");
-        setTimeout(() => {
-          loader.style.opacity = 0;
-          loader.style.visibility = "hidden";
-          loader.setAttribute("aria-hidden", "true");
-          app.style.opacity = 1;
-          app.style.transform = "translateY(0)";
-        }, 6000);
-      } catch (err) {
-        // If something unexpected happens, log and reveal UI to avoid stuck loader.
-        console.error('Initialization error:', err);
-        const loader = document.getElementById("loader");
-        const app = document.getElementById("app");
-        if (loader) {
-          loader.style.opacity = 0;
-          loader.style.visibility = "hidden";
+        function updatePinDisplay() {
+            document.querySelectorAll('#pinDisplay .pin-digit').forEach((digit, i) => {
+                digit.textContent = i < pinInput.length ? '●' : '';
+                digit.classList.toggle('active', i < pinInput.length);
+            });
+            document.getElementById('pinError').classList.remove('show');
         }
-        if (app) {
-          app.style.opacity = 1;
-          app.style.transform = "translateY(0)";
+
+        function validatePin() {
+            if (users[pinInput]) {
+                currentUser = users[pinInput];
+                document.getElementById('pinLockScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                initDashboard();
+            } else {
+                document.getElementById('pinError').classList.add('show');
+                pinInput = '';
+                updatePinDisplay();
+                setTimeout(() => document.getElementById('pinError').classList.remove('show'), 2000);
+            }
         }
-      }
-    });
 
-    // Modal helpers
-    function openModal(html){
-      const overlay = document.getElementById("overlay");
-      const content = document.getElementById("modalContent");
-      content.innerHTML = html;
-      overlay.classList.add("show");
-      overlay.setAttribute("aria-hidden", "false");
-      document.getElementById("modalClose").focus();
-    }
-    function closeModal(){
-      const overlay = document.getElementById("overlay");
-      overlay.classList.remove("show");
-      overlay.setAttribute("aria-hidden", "true");
-      // re-enable any disabled buttons
-      reenableButtons();
-    }
-
-    // Show a loading UI inside the modal and then run the renderer after a delay (6s).
-    // renderer: function that returns HTML string for final content.
-    // while loading, action buttons are disabled.
-    function openWithLoading(renderer){
-      disableButtons();
-      const loadingHtml = `
-        <div class="modal-head">
-          <h2 id="modalTitle">Loading…</h2>
-          <div class="controls"><button class="btn small secondary" onclick="closeModal()">Close</button></div>
-        </div>
-        <div class="modal-loader">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <img src="AddText_10-27-09.04.08.png" alt="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;opacity:0.95;border:2px solid rgba(255,255,255,0.02)">
-            <div style="text-align:left">
-              <div style="font-weight:700">Fetching data</div>
-              <div style="color:var(--muted);font-size:13px">Please wait a moment…</div>
-            </div>
-          </div>
-          <div class="dots" aria-hidden="true" style="margin-top:12px">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-        </div>
-      `;
-      openModal(loadingHtml);
-
-      // Use 6000ms to match the requested load time
-      const simulatedDelay = 6000;
-      setTimeout(() => {
-        try {
-          const html = renderer();
-          document.getElementById("modalContent").innerHTML = html;
-        } finally {
-          reenableButtons();
+        function initDashboard() {
+            updateProfile();
+            updateBalance();
+            updateProgress();
+            checkAccountStatus();
+            setupEventListeners();
         }
-      }, simulatedDelay);
-    }
 
-    function disableButtons(){
-      document.querySelectorAll('.actions .btn').forEach(b => {
-        b.setAttribute('disabled','true');
-      });
-    }
-    function reenableButtons(){
-      document.querySelectorAll('.actions .btn').forEach(b => {
-        b.removeAttribute('disabled');
-      });
-    }
+        function updateProfile() {
+            document.getElementById('profileName').innerHTML = `<span>${currentUser.fullName}</span><span>></span>`;
+            const img = currentUser.profileImage;
+            document.getElementById('profileImage').innerHTML = img ? `<img src="${img}" alt="">` : '<i class="fas fa-user"></i>';
+            
+            const now = new Date();
+            const nextPayment = new Date(currentUser.nextPaymentDate);
+            
+            if (now >= nextPayment) {
+                document.getElementById('nextPaymentDate').classList.add('hidden');
+            } else {
+                document.getElementById('nextPaymentDate').classList.remove('hidden');
+                const days = Math.ceil((nextPayment - now) / (1000*60*60*24));
+                document.getElementById('nextPaymentDate').textContent = `Next payment: ${days} day${days!==1?'s':''}`;
+            }
+        }
 
-    // escaping helper
-    function escapeHtml(str){
-      if(!str && str !== 0) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
+        function updateBalance() {
+            document.getElementById('balanceAmount').textContent = `₦${currentUser.balance.toLocaleString()}`;
+        }
 
-    // Render players (compact listing)
-    function showPlayers(){
-      if(!PLAYERS || PLAYERS.length === 0){
-        return `<div class="modal-head"><h2 id="modalTitle">Players</h2></div><div class="notice">No players found for this team.</div>`;
-      }
-      let html = `<div class="modal-head"><h2 id="modalTitle">Players — ${escapeHtml(TEAM.name)}</h2><div class="controls"><button class="btn small secondary" onclick="closeModal()">Close</button></div></div>`;
-      html += `<div class="list" style="margin-top:10px">`;
-      PLAYERS.forEach(p=>{
-        html += `
-          <div class="player" role="article">
-            <img src="${p.img}" alt="${escapeHtml(p.name)}">
-            <div>
-              <div style="font-weight:700">${escapeHtml(p.name)} <span style="color:var(--muted); font-weight:600">#${p.number}</span></div>
-              <div class="meta">${escapeHtml(p.position)}</div>
-            </div>
-          </div>
-        `;
-      });
-      html += `</div>`;
-      return html;
-    }
+        function updateProgress() {
+            const now = new Date();
+            const nextPayment = new Date(currentUser.nextPaymentDate);
 
-    // Render next fixture in compact view only
-    function showFixtureCompact(){
-      if(!NEXT_FIXTURE){
-        return `<div class="modal-head"><h2 id="modalTitle">Next Fixture</h2></div><div class="notice">There is no upcoming fixture scheduled.</div>`;
-      }
-      const f = NEXT_FIXTURE;
-      const {home, draw, away} = f.odds;
-      const invHome = 1/home, invDraw = 1/draw, invAway = 1/away;
-      const total = invHome + invDraw + invAway;
-      const ph = (invHome/total*100).toFixed(1);
-      const pd = (invDraw/total*100).toFixed(1);
-      const pa = (invAway/total*100).toFixed(1);
-      const probs = [{k:'Home',v:ph},{k:'Draw',v:pd},{k:'Away',v:pa}];
-      probs.sort((a,b)=>parseFloat(b.v)-parseFloat(a.v));
-      const fav = probs[0];
+            if (now >= nextPayment) {
+                currentUser.balance = currentUser.nextBalance;
+                updateBalance();
+                document.getElementById('nextBalanceContainer').classList.add('hidden');
+                document.getElementById('progressContainer').classList.add('hidden');
+                return;
+            }
 
-      const html = `
-        <div class="modal-head">
-          <h2 id="modalTitle">Next Fixture</h2>
-          <div class="controls"><button class="btn small secondary" onclick="closeModal()">Close</button></div>
-        </div>
+            document.getElementById('nextBalanceContainer').classList.remove('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
 
-        <div class="fixture compact" role="article" aria-label="Next fixture compact">
-          <div class="teammini">
-            <img src="${f.home.img}" alt="${escapeHtml(f.home.name)}">
-            <div>
-              <div style="font-weight:700">${escapeHtml(f.home.name)}</div>
-              <div class="team-meta">${escapeHtml(f.date)} • ${escapeHtml(f.time)}</div>
-            </div>
-          </div>
+            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+            const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
+            const total = Math.ceil((end-start)/(1000*60*60*24));
+            const passed = Math.ceil((now-start)/(1000*60*60*24));
+            const progress = Math.min((passed/total)*100, 100);
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('nextBalanceAmount').textContent = `₦${currentUser.nextBalance.toLocaleString()}`;
+        }
 
-          <div class="vs" aria-hidden="true">VS</div>
+        function checkAccountStatus() {
+            const expired = new Date() >= new Date(currentUser.expiryDate);
+            const btn = document.getElementById('depositBtn');
+            if (expired) {
+                btn.textContent = 'Activate Account';
+                btn.onclick = () => window.location.href = 'https://paystack.shop/pay/fpjpxhey-5';
+            }
+        }
 
-          <div class="teammini">
-            <img src="${f.away.img}" alt="${escapeHtml(f.away.name)}">
-            <div>
-              <div style="font-weight:700">${escapeHtml(f.away.name)}</div>
-              <div class="team-meta">${escapeHtml(f.venue)}</div>
-            </div>
-          </div>
+        function isAccountActive() {
+            return new Date() < new Date(currentUser.expiryDate);
+        }
 
-          <div class="odds" aria-hidden="true">
-            <div style="font-weight:700">Odds (1X2)</div>
-            <div class="team-meta">Home: ${f.odds.home}  •  Draw: ${f.odds.draw}  •  Away: ${f.odds.away}</div>
-            <div style="margin-top:8px; font-size:13px">Implied: Home ${ph}% • Draw ${pd}% • Away ${pa}%</div>
-            <div style="margin-top:8px; color:${fav.k==='Home' ? 'var(--accent)' : 'var(--muted)'}; font-weight:700">
-              Most likely: ${escapeHtml(fav.k)} (${fav.v}%)
-            </div>
-          </div>
-        </div>
-      `;
-      return html;
-    }
+        function isTradeTimeAllowed() {
+            const now = new Date();
+            const userTradeDay = currentUser.tradeDate;
+            const currentDay = now.getUTCDate();
+            const currentHour = now.getUTCHours();
+            return currentDay === userTradeDay && currentHour >= 8 && currentHour < 10;
+        }
 
-    // Render past results in compact view only
-    function showResultsCompact(){
-      if(!PAST_RESULTS || PAST_RESULTS.length === 0){
-        return `<div class="modal-head"><h2 id="modalTitle">Past Results</h2></div><div class="notice">No past results available.</div>`;
-      }
-      let rows = '';
-      PAST_RESULTS.forEach(r => {
-        rows += `
-          <div class="result-row" role="article">
-            <div class="team">
-              <img src="${r.home.img}" alt="${escapeHtml(r.home.name)}">
-              <div>
-                <div style="font-weight:700">${escapeHtml(r.home.name)}</div>
-                <div class="team-meta">HT ${escapeHtml(r.ht)} • FT ${escapeHtml(r.ft)}</div>
-              </div>
-            </div>
+        function updateTimerDisplay() {
+            const now = new Date();
+            const activationDate = new Date(currentUser.activationDate);
+            const expiryDate = new Date(currentUser.expiryDate);
 
-            <div style="font-weight:800; color:var(--muted)">vs</div>
+            const activationFormatted = activationDate.toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('activationDateTimeDisplay').textContent = activationFormatted;
 
-            <div class="team">
-              <img src="${r.away.img}" alt="${escapeHtml(r.away.name)}">
-              <div>
-                <div style="font-weight:700">${escapeHtml(r.away.name)}</div>
-                <div class="team-meta">${escapeHtml(r.date)}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+            const expiryFormatted = expiryDate.toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('expiryDateTimeDisplay').textContent = expiryFormatted;
 
-      const html = `
-        <div class="modal-head">
-          <h2 id="modalTitle">Past Results</h2>
-          <div class="controls"><button class="btn small secondary" onclick="closeModal()">Close</button></div>
-        </div>
-        <div class="past-compact" style="margin-top:10px">
-          ${rows}
-        </div>
-      `;
-      return html;
-    }
+            const activeDiff = now - activationDate;
+            document.getElementById('activeDays').textContent = Math.floor(activeDiff / (1000*60*60*24));
+            document.getElementById('activeHours').textContent = Math.floor((activeDiff % (1000*60*60*24)) / (1000*60*60));
+            document.getElementById('activeMinutes').textContent = Math.floor((activeDiff % (1000*60*60)) / (1000*60));
+            document.getElementById('activeSeconds').textContent = Math.floor((activeDiff % (1000*60)) / 1000);
 
-    // Terms & Conditions (compact view)
-    function showTermsCompact(){
-      // This returns static terms content per your request. Edit text here if you'd like different wording.
-      const html = `
-        <div class="modal-head">
-          <h2 id="modalTitle">Terms &amp; Conditions</h2>
-          <div class="controls"><button class="btn small secondary" onclick="closeModal()">Close</button></div>
-        </div>
+            const expiryDiff = expiryDate - now;
+            if (expiryDiff > 0) {
+                document.getElementById('expiryDays').textContent = Math.floor(expiryDiff / (1000*60*60*24));
+                document.getElementById('expiryHours').textContent = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
+                document.getElementById('expiryMinutes').textContent = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
+                document.getElementById('expirySeconds').textContent = Math.floor((expiryDiff % (1000*60)) / 1000);
+                document.getElementById('expiryWarning').style.display = Math.floor(expiryDiff / (1000*60*60*24)) <= 7 ? 'block' : 'none';
+            } else {
+                document.getElementById('expiryDays').textContent = '0';
+                document.getElementById('expiryHours').textContent = '0';
+                document.getElementById('expiryMinutes').textContent = '0';
+                document.getElementById('expirySeconds').textContent = '0';
+                document.getElementById('expiryWarning').style.display = 'block';
+            }
+        }
 
-        <div style="margin-top:10px; line-height:1.5; color:var(--muted); font-size:14px">
-          <p style="color:var(--muted)"><strong>Overview</strong></p>
-          <p>All players and team members of Youthful Heart FC are required to abide by the rules and regulations below. These rules exist to maintain respect, safety, fairness and the good reputation of the club.</p>
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
 
-          <p style="color:var(--muted)"><strong>Respect &amp; Conduct</strong></p>
-          <ul>
-            <li>Respect the Head Coach, Assistant Coach, Team Captain and Assistant Captain at all times. Follow their instructions during training and matches.</li>
-            <li>No foul language, abusive, discriminatory or aggressive behaviour on the pitch, in changing rooms, or immediately after training or matches. This includes verbal or physical aggression directed at teammates, officials or spectators.</li>
-            <li>Maintain professional behaviour on social media when representing the club; avoid posting content that harms the club's reputation.</li>
-          </ul>
+        function renderWithdrawalDetails() {
+            const transaction = currentUser.lastWithdrawal;
 
-          <p style="color:var(--muted)"><strong>Attendance &amp; Punctuality</strong></p>
-          <ul>
-            <li>Arrive at training on time. Repeated lateness will lead to disciplinary action.</li>
-            <li>Bring the required token of <strong>200 Naira</strong> to each training session unless otherwise advised by the coaching staff.</li>
-            <li>If you cannot attend a session, notify the coach or captain in advance with a valid reason.</li>
-          </ul>
+            let statusHTML = '';
+            let progressHTML = '';
 
-          <p style="color:var(--muted)"><strong>Discipline &amp; Penalties</strong></p>
-          <ul>
-            <li>During training, if a player receives a training yellow card (for misconduct determined by staff), the penalty is <strong>200 Naira</strong>.</li>
-            <li>A training red card (serious misconduct) results in a penalty of <strong>500 Naira</strong>, and may include further disciplinary measures (suspension, match ban) depending on severity.</li>
-            <li>Repeated offences escalate penalties. Suspensions or removal from the squad may apply for severe or repeated breaches.</li>
-          </ul>
+            if (transaction.status === 'successful') {
+                statusHTML = '<span style="color: var(--success); font-weight: 700;">✓ Successful</span>';
+                progressHTML = `
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
+                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
+                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
+                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
+                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                            <span>Payment successful</span>
+                            <span>Processing by bank</span>
+                            <span>Received by bank</span>
+                        </div>
+                    </div>
+                `;
+            } else if (transaction.status === 'pending') {
+                statusHTML = '<span style="color: var(--warning); font-weight: 700;">⏳ Pending</span>';
+                progressHTML = `
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
+                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
+                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
+                            <div style="flex: 1; height: 2px; background: var(--text-muted); margin: 0 10px;"></div>
+                            <div style="width: 30px; height: 30px; background: var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700;">○</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                            <span>Payment successful</span>
+                            <span>Processing by bank</span>
+                            <span>Received by bank</span>
+                        </div>
+                    </div>
+                `;
+            } else if (transaction.status === 'failed') {
+                statusHTML = '<span style="color: var(--danger); font-weight: 700;">✗ Failed</span>';
+                progressHTML = `
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 12px; margin: 20px 0; color: var(--danger); font-size: 12px; text-align: center;">
+                        ${transaction.failureReason || 'Transaction failed'}
+                    </div>
+                `;
+            }
 
-          <p style="color:var(--muted)"><strong>Health &amp; Safety</strong></p>
-          <ul>
-            <li>Inform coaching staff of any injury or medical condition before training starts. Do not train while carrying an untreated serious injury.</li>
-            <li>No alcohol or illicit drugs before or during training and matches. Smoking is discouraged during club activities and may lead to disciplinary actions.</li>
-            <li>Take care of club equipment and facilities. Report damaged equipment immediately.</li>
-          </ul>
+            const transactionDate = transaction.date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
 
-          <p style="color:var(--muted)"><strong>Kit &amp; Personal Items</strong></p>
-          <ul>
-            <li>Wear appropriate training kit and boots; maintain personal hygiene.</li>
-            <li>Label personal items; the club is not responsible for lost valuables.</li>
-          </ul>
+            const withdrawalHTML = `
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Transfer to ${currentUser.fullName}</div>
+                    <div style="font-size: 32px; font-weight: 700; color: var(--accent-green); margin-bottom: 10px;">₦${transaction.amount.toLocaleString()}.00</div>
+                    <div style="margin-bottom: 20px;">${statusHTML}</div>
+                    ${progressHTML}
+                    <div style="background: var(--primary-dark); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; margin: 20px 0; text-align: left;">
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">RECIPIENT DETAILS</div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-light); margin-bottom: 4px;">${currentUser.bankDetails.accountName}</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">${currentUser.bankDetails.bankName} | ${currentUser.bankDetails.accountNumber}</div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-bottom: 12px;">
+                            <div style="font-size: 11px; color: var(--text-muted);">TRANSACTION NO</div>
+                            <div style="font-size: 12px; color: var(--text-light); font-family: 'Courier New', monospace;">${transaction.id}</div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-bottom: 12px;">
+                            <div style="font-size: 11px; color: var(--text-muted);">PAYMENT METHOD</div>
+                            <div style="font-size: 12px; color: var(--text-light);">${transaction.method}</div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+                            <div style="font-size: 11px; color: var(--text-muted);">TRANSACTION DATE</div>
+                            <div style="font-size: 12px; color: var(--text-light);">${transactionDate}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-          <p style="color:var(--muted)"><strong>Communication</strong></p>
-          <ul>
-            <li>Check team messages regularly for schedule changes, and confirm availability when requested.</li>
-            <li>Report any concerns about teammates, staff or welfare to the Head Coach or an appointed club official.</li>
-          </ul>
+            document.getElementById('withdrawalDetailsContent').innerHTML = withdrawalHTML;
+            document.getElementById('withdrawalDetailsModal').classList.add('show');
+        }
 
-          <p style="color:var(--muted)"><strong>Final Notes</strong></p>
-          <ul>
-            <li>These rules are designed to keep the team safe, respectful and competitive. Management reserves the right to update these terms; players will be notified of changes.</li>
-            <li>By participating in club activities you agree to follow these rules and accept the disciplinary framework outlined above.</li>
-          </ul>
+        function setupEventListeners() {
+            document.getElementById('profileName').addEventListener('click', () => {
+                updateTimerDisplay();
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimerDisplay, 1000);
+                document.getElementById('timerModal').classList.add('show');
+            });
 
-          <p style="margin-top:10px; color:var(--muted); font-size:13px">If you would like any specific clause added or changed (for example medical waiver wording or detailed appeals process), provide the text and it can be added.</p>
-        </div>
-      `;
-      return html;
-    }
+            document.getElementById('timerClose').addEventListener('click', () => {
+                document.getElementById('timerModal').classList.remove('show');
+                if (timerInterval) clearInterval(timerInterval);
+            });
 
-  </script>
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                document.getElementById('settingsContent').innerHTML = `
+                    <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName || 'N/A'}</div></div>
+                    <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone || 'N/A'}</div></div>
+                `;
+                document.getElementById('settingsModal').classList.add('show');
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                currentUser = null;
+                pinInput = '';
+                if (timerInterval) clearInterval(timerInterval);
+                document.getElementById('pinLockScreen').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
+            });
+
+            document.getElementById('depositBtn').addEventListener('click', () => {
+                if (new Date() < new Date(currentUser.expiryDate)) {
+                    document.getElementById('loaderOverlay').classList.add('show');
+                    setTimeout(() => { document.getElementById('loaderOverlay').classList.remove('show'); }, 6000);
+                }
+            });
+
+            document.getElementById('withdrawBtn').addEventListener('click', () => {
+                document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
+                document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
+                document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
+                document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
+                const now = new Date();
+                const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
+                document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
+                document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
+                document.getElementById('withdrawModal').classList.add('show');
+            });
+
+            document.getElementById('tradeNowItem').addEventListener('click', () => {
+                document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
+                const isAllowed = isTradeTimeAllowed();
+                const isActive = isAccountActive();
+                document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
+                document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
+                document.getElementById('tradeName').value = currentUser.fullName;
+                document.getElementById('tradeDate').valueAsDate = new Date();
+                document.getElementById('tradeNowModal').classList.add('show');
+            });
+
+            document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
+                renderWithdrawalDetails();
+            });
+
+            document.getElementById('referralsItem').addEventListener('click', () => {
+                const c = currentUser.referral.count;
+                document.getElementById('referralCode').textContent = currentUser.referral.code;
+                document.getElementById('referralCountText').textContent = `${c} / 10`;
+                document.getElementById('referralFill').style.width = (c/10)*100 + '%';
+                document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
+                if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
+                    currentUser.balance += currentUser.referral.bonus;
+                    localStorage.setItem('bonus_' + currentUser.referral.code, '1');
+                    updateBalance();
+                }
+                document.getElementById('referralsModal').classList.add('show');
+            });
+
+            document.getElementById('howToPlayItem').addEventListener('click', () => {
+                document.getElementById('howToPlayModal').classList.add('show');
+            });
+
+            document.getElementById('sportybetItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.sportybet));
+            document.getElementById('notificationItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.notificationCenter));
+            document.getElementById('customerServiceItem').addEventListener('click', () => window.location.href = EXTERNAL_LINKS.customerService);
+            document.getElementById('shareIdeaItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.shareIdea));
+
+            document.getElementById('tradeAmount').addEventListener('input', (e) => {
+                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
+            });
+
+            document.getElementById('withdrawForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const pin = Array.from(document.querySelectorAll('.withdraw-pin')).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                document.getElementById('withdrawPinHidden').value = pin;
+                document.getElementById('loaderOverlay').classList.add('show');
+                setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
+            });
+
+            document.getElementById('tradeForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                if (!isAccountActive()) {
+                    alert('⚠️ Your account has expired. Please activate your account to continue trading.');
+                    closeModal('tradeNowModal');
+                    return;
+                }
+                
+                if (!isTradeTimeAllowed()) {
+                    alert('⏰ Trading is only available on Day ' + currentUser.tradeDate + ' between 08:00-10:00 UTC');
+                    return;
+                }
+                
+                const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
+                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
+                document.getElementById('tradePinHidden').value = pin;
+                document.getElementById('loaderOverlay').classList.add('show');
+                setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
+            });
+
+            document.querySelectorAll('.modal').forEach(m => {
+                m.addEventListener('click', (e) => {
+                    if (e.target === m) m.classList.remove('show');
+                });
+            });
+        }
+    </script>
 </body>
 </html>
