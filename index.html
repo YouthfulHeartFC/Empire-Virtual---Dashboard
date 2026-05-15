@@ -1,1659 +1,1328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire Virtual - Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-dark: #1a1410;
-            --secondary-dark: #2d2420;
-            --accent-green: #10b981;
-            --accent-green-dark: #059669;
-            --text-light: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border-color: #3d3430;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
-            color: var(--text-light);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-type-header {
-            background: var(--accent-green);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        /* PIN Lock Screen Styles */
-        .pin-lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .pin-lock-screen.hidden {
-            display: none !important;
-        }
-
-        .pin-container {
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .pin-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-light);
-        }
-
-        .pin-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
-        .pin-display {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .pin-digit {
-            width: 50px;
-            height: 50px;
-            background: var(--primary-dark);
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent-green);
-            transition: all 0.2s;
-        }
-
-        .pin-digit.active {
-            border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .pin-keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .pin-key {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-light);
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .pin-key:hover {
-            background: var(--secondary-dark);
-            border-color: var(--accent-green);
-        }
-
-        .pin-key:active {
-            transform: scale(0.95);
-        }
-
-        .pin-key.delete {
-            grid-column: span 3;
-            background: rgba(239, 68, 68, 0.1);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        .pin-key.delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .pin-error {
-            color: var(--danger);
-            font-size: 12px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .pin-error.show {
-            display: block;
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        /* Dashboard Styles */
-        .dashboard {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .dashboard.hidden {
-            display: none !important;
-        }
-
-        .header {
-            background: var(--secondary-dark);
-            border-bottom: 1px solid var(--border-color);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .settings-btn {
-            background: none;
-            border: none;
-            color: var(--accent-green);
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .settings-btn:hover {
-            transform: rotate(20deg);
-        }
-
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .profile-section {
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 25px 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .profile-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            background: var(--primary-dark);
-            border: 3px solid var(--accent-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            overflow: hidden;
-        }
-
-        .profile-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .profile-name:hover {
-            color: var(--accent-green);
-        }
-
-        .profile-date {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            height: 18px;
-        }
-
-        .profile-date.hidden {
-            display: none !important;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(16, 185, 129, 0.1) 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .balance-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .balance-amount {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        .progress-container {
-            margin: 15px 0;
-        }
-
-        .progress-container.hidden {
-            display: none !important;
-        }
-
-        .progress-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--primary-dark);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            margin-bottom: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-
-        .next-balance-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            padding: 8px;
-            background: var(--primary-dark);
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            display: block;
-        }
-
-        .next-balance-label.hidden {
-            display: none !important;
-        }
-
-        .next-balance-value {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-
-        /* Timer Modal Styles */
-        .timer-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .timer-modal.show {
-            display: flex;
-        }
-
-        .timer-content {
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 30px 25px;
-            max-width: 380px;
-            text-align: center;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .timer-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: var(--accent-green);
-        }
-
-        .timer-section {
-            margin-bottom: 30px;
-        }
-
-        .timer-section-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent-green);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .timer-box {
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .timer-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .timer-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        .countdown-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .countdown-item {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .countdown-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        .countdown-unit {
-            font-size: 9px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-top: 4px;
-        }
-
-        .expiry-warning {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--danger);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 11px;
-            color: var(--danger);
-            text-align: center;
-        }
-
-        .timer-close {
-            background: var(--accent-green);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .timer-close:hover {
-            background: var(--accent-green-dark);
-        }
-
-        /* Buttons */
-        .buttons-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent-green);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: var(--accent-green-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:disabled {
-            background: var(--text-muted);
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .btn-secondary {
-            background: var(--primary-dark);
-            color: var(--accent-green);
-            border: 1px solid var(--accent-green);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        /* Menu */
-        .menu-section {
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .menu-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .menu-item:hover {
-            background: rgba(16, 185, 129, 0.1);
-            padding-left: 25px;
-        }
-
-        .menu-item-text {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .menu-item-icon {
-            font-size: 16px;
-            color: var(--accent-green);
-            width: 20px;
-        }
-
-        .menu-item-arrow {
-            color: var(--text-muted);
-            font-size: 16px;
-        }
-
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 2000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 20px 20px 0 0;
-            padding: 25px 20px;
-            width: 100%;
-            max-width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-green);
-        }
-
-        .form-input:disabled {
-            background: var(--secondary-dark);
-            color: var(--text-muted);
-        }
-
-        .pin-input-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .pin-input-box {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary-dark);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-light);
-            text-align: center;
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .pin-input-box:focus {
-            outline: none;
-            border-color: var(--accent-green);
-        }
-
-        /* Loader */
-        .loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9000;
-        }
-
-        .loader-overlay.show {
-            display: flex;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(16, 185, 129, 0.2);
-            border-top-color: var(--accent-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Settings */
-        .settings-item {
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-bottom: 12px;
-        }
-
-        .settings-label {
-            color: var(--text-muted);
-            font-size: 11px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .settings-value {
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        /* Referral */
-        .referral-card {
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .referral-code {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent-green);
-            margin-bottom: 10px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .referral-count {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .referral-progress {
-            background: var(--secondary-dark);
-            border-radius: 8px;
-            overflow: hidden;
-            height: 6px;
-            margin-bottom: 10px;
-        }
-
-        .referral-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-green), #6ee7b7);
-            transition: width 0.5s ease;
-        }
-
-        .referral-bonus-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            padding: 8px;
-            background: var(--secondary-dark);
-            border-radius: 6px;
-        }
-
-        .referral-bonus-value {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-
-        /* Instructions */
-        .instructions-list {
-            list-style: none;
-        }
-
-        .instructions-list li {
-            padding: 10px 0 10px 30px;
-            position: relative;
-            font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-light);
-        }
-
-        .instructions-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--accent-green);
-            font-weight: 700;
-        }
-
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .expired-warning {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .trade-time-warning {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .trade-info-box {
-            background: var(--primary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .trade-info-box strong {
-            color: var(--accent-green);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>EmpireStateBank — Sport Prediction</title>
+
+  <!-- Roboto for a premium Android feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* === Color Palette (NO TRANSPARENCY) === */
+    :root{
+      --bg:#1f2430;          /* Background */
+      --card:#232937;        /* Card background */
+      --header:#e50914;      /* Header red */
+      --bottom:#000000;      /* Bottom nav black */
+      --gold:#d4a437;        /* Gold accent */
+      --text:#ffffff;        /* White text */
+      --muted:#9aa0aa;       /* Grey secondary text */
+      --green:#3fc06b;       /* Active green */
+      --red:#e03b3b;         /* Expired red */
+      --shadow:#000000;      /* Solid shadow (no alpha) */
+      --success:#2ecc71;
+    }
+
+    /* === Base app layout === */
+    /* Disable page-level scrollbars so only iframe scrolls */
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      font-family: "Roboto", system-ui, -apple-system, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color:var(--text);
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden; /* prevent body scroll */
+    }
+
+    /* Container sized for mobile-first */
+    .app {
+      max-width:412px; /* typical Android phone viewport */
+      margin:0 auto;
+      height:100vh;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden; /* ensure no scrolling on app container */
+      background:var(--bg);
+    }
+
+    /* HEADER */
+    header.app-header{
+      height:72px;
+      background:var(--header);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px;
+      box-sizing:border-box;
+      gap:8px;
+      flex: 0 0 72px;
+    }
+    .logo-wrap{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo-circle{
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      background:var(--card);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 6px 18px var(--shadow);
+      flex-shrink:0;
+    }
+    .logo-circle img{ width:44px; height:44px; object-fit:contain; border-radius:50%; }
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn {
+      font-weight:500;
+      font-size:14px;
+      padding:8px 14px;
+      border-radius:12px;
+      border:2px solid #ffffff;
+      cursor:pointer;
+      line-height:1;
+      background:transparent;
+      color:#fff;
+    }
+    .btn.join { background:#ffffff; color:var(--header); }
+    .btn.login { background:var(--header); color:#ffffff; border:2px solid #ffffff; opacity:1; }
+
+    /* header percent pill (shown when logged in) */
+    .header-percent {
+      display:none;
+      background:var(--card);
+      color:var(--text);
+      padding:8px 12px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:14px;
+      box-shadow:0 6px 18px var(--shadow);
+      min-width:70px;
+      text-align:center;
+    }
+
+    /* MAIN content area with iframe
+       Make main non-scrollable — iframe will be the only scrolling element */
+    main.content {
+      padding:12px;
+      box-sizing:border-box;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      background:var(--bg);
+      overflow: hidden; /* disable main scrolling */
+      flex: 1 1 auto;
+    }
+
+    .iframe-card{
+      background:var(--card);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 6px 18px var(--shadow);
+      /* size the iframe to exactly the available area between header and bottom nav */
+      display:flex;
+      flex-direction:column;
+      height: calc(100vh - 72px - 64px - 24px); /* viewport minus header (72) minus bottom-nav (64) minus main padding (12 top + 12 bottom) */
+      min-height:220px;
+    }
+    .iframe-card iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+      background:#ffffff;
+      /* allow iframe content to be scrolled internally */
+      overflow:auto;
+    }
+
+    /* Footer bar (small) above bottom navigation */
+    .footer-bar{
+      background:var(--bottom);
+      color:var(--text);
+      text-align:center;
+      padding:10px;
+      font-weight:500;
+      font-size:15px;
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:64px; /* above bottom nav which is fixed 0 */
+      width:100%;
+      max-width:412px;
+      box-sizing:border-box;
+    }
+    .footer-bar.hidden { display:none; }
+
+    /* BOTTOM NAV (fixed) */
+    nav.bottom-nav{
+      height:64px;
+      background:var(--bottom);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 16px;
+      box-sizing:border-box;
+      position:fixed;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:100%;
+      max-width:412px;
+      border-top:1px solid #111111;
+      flex: 0 0 64px;
+    }
+    .nav-left,.nav-right{ display:flex; align-items:center; gap:12px; }
+    .generate-btn{
+      background:var(--gold);
+      color:#111;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      box-shadow:0 6px 18px var(--shadow);
+      cursor:pointer;
+      border:0;
+      display:none; /* hidden by default — only show when logged in */
+    }
+    .generate-btn.visible{ display:inline-flex; }
+    .generate-btn[disabled]{ opacity:0.6; pointer-events:none; }
+
+    .profile-btn{
+      width:44px;height:44px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px var(--shadow);cursor:pointer;
+    }
+    .profile-btn svg{ width:22px; height:22px; fill:#fff; }
+
+    /* LOGIN PAGE (overlay) */
+    .page {
+      position:fixed;
+      inset:0;
+      display:none;
+      background:var(--bg);
+      z-index:50;
+      padding:20px;
+      box-sizing:border-box;
+      overflow:auto;
+    }
+    .page.active{ display:block; }
+
+    .login-card{
+      max-width:360px;margin:36px auto 0 auto;
+      background:var(--card);
+      border-radius:16px;
+      padding:18px;
+      box-sizing:border-box;
+      box-shadow:0 8px 24px var(--shadow);
+    }
+    .center{ text-align:center; }
+    .login-card img{ width:96px; height:96px; object-fit:contain; border-radius:16px; display:block; margin:0 auto 12px; }
+    .pin-input{
+      width:100%;
+      padding:14px;
+      font-size:22px;
+      border-radius:10px;
+      border:0;
+      background:#111216;
+      color:var(--text);
+      box-sizing:border-box;
+      outline:none;
+      text-align:center;
+      letter-spacing:10px;
+    }
+    .large-btn{
+      margin-top:12px;
+      background:var(--green);
+      color:#fff;
+      padding:14px;
+      border-radius:12px;
+      font-weight:700;
+      border:0;
+      width:100%;
+      cursor:pointer;
+    }
+
+    /* DASHBOARD (kept but not auto-opened) */
+    .dashboard{
+      display:none;
+      flex-direction:column;
+      gap:12px;
+      padding:12px;
+      box-sizing:border-box;
+      min-height:100vh;
+      overflow:auto;
+    }
+    .dashboard.active{ display:flex; }
+
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:12px;
+      box-sizing:border-box;
+      box-shadow:0 6px 18px var(--shadow);
+    }
+
+    /* ... rest of styles unchanged ... */
+    .top-row{ display:flex; align-items:center; gap:12px; justify-content:space-between; }
+    .profile-ico{ width:64px;height:64px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;flex-shrink:0; overflow:hidden; }
+    .profile-ico img{ width:56px; height:56px; object-fit:contain; border-radius:50%; }
+    .user-meta{ flex:1; display:flex; flex-direction:column; gap:4px; padding-right:8px; }
+    .user-name{ font-size:18px; font-weight:700; color:var(--text); }
+    .progress-title{ font-size:13px; color:var(--muted); font-weight:500; }
+    .icon-btn{ width:44px;height:44px;border-radius:10px;background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer; box-shadow:0 6px 18px var(--shadow); }
+    .back-btn { margin-right:8px; display:flex; align-items:center; gap:8px; cursor:pointer; border-radius:10px; padding:8px; background:var(--card); box-shadow:0 6px 18px var(--shadow); }
+    .back-btn svg{ width:18px; height:18px; fill:#fff; }
+    .progress-wrap{ display:flex; gap:12px; align-items:center; margin-top:8px; }
+    .progress-bar{ background:#2d333a; flex:1; height:18px; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px var(--shadow); }
+    .progress-inner{ height:100%; width:50%; background:var(--green); transition:width 0.6s ease; border-radius:10px; }
+    .progress-expiry{ font-size:12px; color:var(--muted); min-width:90px; text-align:right; }
+    .plan-row{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-weight:600; color:var(--muted); }
+    .subscribe-btn{ margin-top:12px; background:var(--green); color:#fff; padding:12px; border-radius:12px; font-weight:700; border:0; width:100%; cursor:pointer; display:none; }
+    .subscribe-btn.visible{ display:block; }
+    .loyalty{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .loyalty-left{ font-weight:700; font-size:16px; color:var(--text); }
+    .loyalty-right{ color:var(--green); font-weight:700; display:flex; gap:8px; align-items:center; }
+    .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+    button.gcard{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:var(--card); border-radius:12px; padding:10px; text-align:center; font-weight:700; box-shadow:0 6px 18px var(--shadow); position:relative; cursor:pointer; user-select:none; border:0; color:var(--text); }
+    button.gcard:active{ transform:translateY(1px); }
+    button.gcard .icon{ width:44px;height:44px;border-radius:10px;background:var(--header);display:inline-flex;align-items:center;justify-content:center;margin-bottom:0;color:#fff;font-weight:700; box-shadow:0 6px 18px var(--shadow); }
+    .gcard .icon svg{ width:20px; height:20px; fill:#fff; }
+    .notify-dot{ position:absolute; right:10px; top:10px; width:10px;height:10px;border-radius:50%; background:var(--red); border:2px solid var(--card); }
+
+    .code-modal { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:94%; max-width:380px; background:var(--card); border-radius:14px; padding:14px; box-shadow:0 12px 36px var(--shadow); z-index:260; display:none; flex-direction:column; gap:12px; }
+    .code-modal.active { display:flex; }
+    .code-display{ background:#0b0b0b; color:var(--text); padding:16px 18px; border-radius:12px; font-size:22px; font-weight:900; letter-spacing:6px; display:flex; align-items:center; gap:12px; user-select:none; touch-action:manipulation; box-shadow:0 8px 24px var(--shadow); }
+    .code-site-logo{ width:44px; height:28px; object-fit:contain; border-radius:6px; background:var(--card); padding:4px; }
+    .copy-btn{ background:var(--card); color:var(--text); border-radius:10px; padding:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:84px; background:#111214; color:var(--text); padding:10px 14px; border-radius:10px; box-shadow:0 8px 24px var(--shadow); display:none; z-index:90; font-weight:600; }
+    .toast.show{ display:block; }
+
+    .overlay{ position:fixed; inset:0; background:#000000; z-index:200; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; color:#fff; }
+    .hidden{ display:none; }
+
+    .initial-logo{ width:120px; height:120px; object-fit:contain; transform-origin:center; will-change:transform, opacity; animation:logoPulseSpin 1800ms ease-in-out infinite; }
+    @keyframes logoPulseSpin { 0% { transform: scale(0.92) rotate(0deg); opacity: 0.75; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55)); } 35% { transform: scale(1.06) rotate(8deg); opacity: 1; } 65% { transform: scale(1.02) rotate(-6deg); opacity: 1; } 100% { transform: scale(0.92) rotate(0deg); opacity: 0.75; } }
+    .loader-spinner{ width:48px;height:48px;border-radius:50%;border:4px solid #ffffff;border-top-color:var(--gold);animation:spin 1s linear infinite; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+
+    .modal{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:92%; max-width:360px; background:var(--card); border-radius:14px; padding:14px; box-shadow:0 12px 36px var(--shadow); z-index:220; display:none; }
+    .modal.active{ display:block; }
+    .site-option{ display:flex; gap:12px; align-items:center; padding:10px; border-radius:10px; cursor:pointer; }
+    .site-option img{ width:44px;height:28px; object-fit:contain; border-radius:6px; background:#0b0b0b;padding:4px;}
+    .site-option.selected{ background:#101216; box-shadow:0 6px 18px var(--shadow); }
+
+    .profile-page{ display:none; position:fixed; inset:0; background:var(--bg); z-index:80; padding:14px; box-sizing:border-box; overflow:auto; }
+    .profile-page.active{ display:block; }
+    .logout-btn{ margin-top:12px; background:var(--red); color:#fff; padding:12px; border-radius:12px; border:0; width:100%; font-weight:700; cursor:pointer; }
+
+    @media (min-width:420px){
+      .app{ border-radius:16px; overflow:hidden; box-shadow:0 12px 40px var(--shadow); margin-top:18px; }
+      .footer-bar{ bottom:84px; }
+      nav.bottom-nav{ bottom:0; }
+    }
+  </style>
 </head>
 <body>
-    <!-- PIN LOCK SCREEN -->
-    <div class="pin-lock-screen" id="pinLockScreen">
-        <div class="pin-container">
-            <h1 class="pin-title">EmpireStateBank</h1>
-            <p class="pin-subtitle">Enter your 4-digit PIN</p>
-            <div class="pin-display" id="pinDisplay">
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-                <div class="pin-digit"></div>
-            </div>
-            <div class="pin-keypad">
-                <button class="pin-key" data-key="1">1</button>
-                <button class="pin-key" data-key="2">2</button>
-                <button class="pin-key" data-key="3">3</button>
-                <button class="pin-key" data-key="4">4</button>
-                <button class="pin-key" data-key="5">5</button>
-                <button class="pin-key" data-key="6">6</button>
-                <button class="pin-key" data-key="7">7</button>
-                <button class="pin-key" data-key="8">8</button>
-                <button class="pin-key" data-key="9">9</button>
-                <button class="pin-key" data-key="0">0</button>
-                <button class="pin-key delete"><i class="fas fa-backspace"></i></button>
-            </div>
-            <div class="pin-error" id="pinError">
-                <i class="fas fa-exclamation-circle"></i> Incorrect PIN
-            </div>
-        </div>
+  <div class="app" id="app">
+
+    <!-- FULLSCREEN LOADER (black), shown on first open for 6s.
+         Only show the company PNG with a subtle animation (no text). -->
+    <div id="initialLoader" class="overlay" aria-hidden="false" style="z-index:500;">
+      <img src="AddText_04-11-12.53.52.png" alt="Empire Logo" class="initial-logo" />
     </div>
 
-    <!-- MAIN DASHBOARD -->
-    <div class="dashboard hidden" id="dashboard">
-        <div class="header">
-            <div class="header-title">Dashboard</div>
-            <button class="settings-btn" id="settingsBtn">
-                <i class="fas fa-cog"></i>
-            </button>
+    <!-- Header -->
+    <header class="app-header" role="banner">
+      <div class="logo-wrap">
+        <div class="logo-circle" aria-hidden="true">
+          <img src="AddText_04-11-12.53.52.png" alt="Empire" />
         </div>
-        <div class="content">
-            <div class="profile-section">
-                <div class="profile-image" id="profileImage"><i class="fas fa-user"></i></div>
-                <div class="profile-name" id="profileName"><span>Loading</span><span>></span></div>
-                <div class="profile-date" id="nextPaymentDate"></div>
-                <div class="balance-card">
-                    <div class="balance-label">Total Balance</div>
-                    <div class="balance-amount" id="balanceAmount">₦0.00</div>
-                </div>
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-label">
-                        <span>Progress to Next Payment</span>
-                        <span id="progressPercent">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                    </div>
-                    <div class="next-balance-label" id="nextBalanceContainer">
-                        Next Balance: <span class="next-balance-value" id="nextBalanceAmount">₦0.00</span>
-                    </div>
-                </div>
-            </div>
+      </div>
 
-            <div class="buttons-section">
-                <button class="btn btn-primary" id="depositBtn"><i class="fas fa-arrow-down"></i> Deposit</button>
-                <button class="btn btn-secondary" id="withdrawBtn"><i class="fas fa-arrow-up"></i> Withdraw</button>
-            </div>
+      <div style="flex:1"></div>
 
-            <div class="menu-section">
-                <div class="menu-item" id="tradeNowItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-chart-line"></i></span><span>Trade Now</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="withdrawalRecordsItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-history"></i></span><span>Withdrawal Records</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="referralsItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-users"></i></span><span>Referrals</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="sportybetItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-share-alt"></i></span><span>SportybetSocial</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="customerServiceItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-headset"></i></span><span>Customer Service</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="notificationItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-bell"></i></span><span>Notification Center</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="howToPlayItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-question-circle"></i></span><span>How to play</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="menu-item" id="shareIdeaItem">
-                    <div class="menu-item-text"><span class="menu-item-icon"><i class="fas fa-lightbulb"></i></span><span>Share an Idea</span></div>
-                    <span class="menu-item-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-            </div>
-            <button class="btn logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <!-- Default actions (shown when NOT logged in) -->
+      <div class="header-actions" id="headerActions">
+        <button class="btn join" id="joinNowBtn">Join Now</button>
+        <button class="btn login" id="openLoginBtn">Login</button>
+      </div>
+
+      <!-- When logged in show percent pill instead of join/login -->
+      <div class="header-percent" id="headerPercent" title="Subscription progress">--%</div>
+    </header>
+
+    <!-- Main content area -->
+    <main class="content" role="main" id="mainContent">
+      <div class="iframe-card card" aria-hidden="false">
+        <iframe src="https://www.betclan.com/livescores/" title="Livescores" scrolling="yes"></iframe>
+      </div>
+
+      <!-- Minimal preview shown even when logged in; dashboard is NOT auto-opened -->
+      <div id="dashboardPreview" class="card" style="display:block;">
+        <div class="top-row">
+          <!-- image removed per request -->
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="font-size:12px;color:var(--muted)">Plan</div>
+            <div id="previewPlanName" style="font-weight:700">--</div>
+          </div>
+          <!-- show small referral summary in preview -->
+          <div id="dashboardReferralPreview" style="font-size:12px;color:var(--muted); align-self:center;">Referral: <span id="dashboardReferralCodePreview">--</span></div>
         </div>
+      </div>
+
+      <!-- A hidden dashboard section remains (only opened via profile icon) -->
+      <section id="dashboard" class="dashboard" aria-hidden="true" style="display:none;">
+        <div class="card">
+          <div class="top-row">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <!-- Back-to-main button (distinct icon) -->
+              <div class="back-btn" id="backToMainBtn" title="Back to Home" role="button" tabindex="0" aria-label="Back to main page">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 13-4-4 4-4 1.4 1.4L10.8 10H17v2h-6.2l1.6 1.6L11 15z" fill="#fff"/></svg>
+              </div>
+
+              <div class="profile-ico" id="userSiteLogoWrap"><img id="userSiteLogo" src="sportybet.png" alt="site" /></div>
+              <div class="user-meta">
+                <div class="user-name" id="userName">User Name</div>
+                <div class="progress-title">Subscription Progress</div>
+                <!-- Dashboard referral display -->
+                <div id="dashboardReferral" style="font-size:13px;color:var(--muted);margin-top:6px;">Referral: <span id="dashboardReferralCode">--</span></div>
+              </div>
+            </div>
+            <div class="icon-btn" id="openSettingsBtn" title="Settings" role="button" tabindex="0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.94-3.5a1 1 0 0 0 0-.5l-1.1-2a1 1 0 0 0-.8-.5l-2.3-.3a7.07 7.07 0 0 0-1.6-1l-.4-2.2a1 1 0 0 0-.9-.8h-2a1 1 0 0 0-.9.8l-.4 2.2c-.5.2-1 .5-1.6 1l-2.3.3a1 1 0 0 0-.8.5l-1.1 2a1 1 0 0 0 0 .5l1.1 2c.2.4.6.7.8.5l2.3-.3c.6.5 1.1.9 1.6 1l.4 2.2c.1.6.6 1 1.2 1h2c.6 0 1.1-.4 1.2-1l.4-2.2c.5-.2 1-.5 1.6-1l2.3.3c.4.1.7-.2.9-.5l1.1-2z"/></svg>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-bar" aria-hidden="false">
+              <div id="progressInner" class="progress-inner" style="width:0%;background:var(--green)"></div>
+            </div>
+            <div class="progress-expiry" id="expiryText">Expires: --</div>
+          </div>
+
+          <div class="plan-row">
+            <div>Total Plan</div>
+            <div id="dashboardPlanName">--</div>
+          </div>
+
+          <button id="subscribeBtn" class="subscribe-btn">Subscribe — <svg style="vertical-align:middle" width="16" height="16" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7.58 2 4 5.58 4 10c0 4.97 6.34 9.8 7.14 10.47.3.25.7.25 1 0C13.66 19.8 20 14.97 20 10c0-4.42-3.58-8-8-8zm1 11h-2V7h2v6z"/></svg></button>
+        </div>
+
+        <div class="card loyalty">
+          <div>
+            <div class="loyalty-left">Empire Loyalty</div>
+            <div style="color:var(--muted); font-size:13px;">Earn rewards as you subscribe</div>
+          </div>
+          <div class="loyalty-right">
+            <div>Earn Rewards</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="grid">
+          <button id="empireSocial" class="gcard" type="button" aria-label="Open EmpireSocial">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 14h-2v-2H9l3-6v4h2v4z"/></svg></div>
+            <div>EmpireSocial</div>
+          </button>
+
+          <button id="customerService" class="gcard" type="button" aria-label="Contact Customer Service">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.11 0-2 .89-2 2v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V6c0-1.11-.89-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+            <div>Customer Service</div>
+          </button>
+
+          <button id="notificationCenter" class="gcard" type="button" aria-label="Open Notification Center">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 1 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+            <div>Notification Center</div>
+            <div class="notify-dot" aria-hidden="true"></div>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer message just above bottom nav -->
+    <div id="footerBar" class="footer-bar">Login To Get Betting Tips</div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" role="navigation">
+      <div class="nav-left">
+        <button id="generateBtn" class="generate-btn">Generate Booking Code</button>
+      </div>
+      <div class="nav-right">
+        <div class="profile-btn" id="openProfileBtn" title="Profile" role="button" tabindex="0">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.866 0-7 3.134-7 7h2c0-2.761 2.239-5 5-5s5 2.239 5 5h2c0-3.866-3.134-7-7-7z" fill="#ffffff"/></svg>
+        </div>
+      </div>
+    </nav>
+
+    <!-- LOGIN PAGE -->
+    <section id="loginPage" class="page" aria-hidden="true">
+      <div class="login-card">
+        <div class="center">
+          <img src="AddText_04-11-12.53.52.png" alt="Empire Logo" />
+          <div style="font-weight:700; font-size:18px; margin-top:8px;">Enter PIN</div>
+          <div style="color:var(--muted); margin-bottom:8px;">Use your 4 digit PIN</div>
+        </div>
+
+        <input id="pinInput" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" autofocus />
+
+        <button id="loginSubmit" class="large-btn">Login</button>
+
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button id="loginCancel" class="btn" style="flex:1; background:#333; border:2px solid #fff; color:#fff;">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CODE MODAL (shows booking code) -->
+    <div id="codeModal" class="code-modal" aria-hidden="true">
+      <div style="font-weight:700; font-size:16px;">Booking Code</div>
+      <div class="code-display" id="codeModalDisplay">
+        <img id="codeModalLogo" class="code-site-logo" src="sportybet.png" alt="site" />
+        <div id="codeModalValue" style="font-family:monospace; font-size:20px">----</div>
+        <button id="copyCodeModalBtn" class="copy-btn" title="Copy code">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        </button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button id="closeCodeModal" class="btn" style="background:#333; border:2px solid #fff; color:#fff;">Close</button>
+      </div>
     </div>
 
-    <!-- TIMER MODAL -->
-    <div class="timer-modal" id="timerModal">
-        <div class="timer-content">
-            <div class="timer-title">⏳ Account Status</div>
-            
-            <div class="timer-section">
-                <div class="timer-section-title">🚀 Activated On</div>
-                <div class="timer-box">
-                    <div class="timer-label">Activation Date & Time</div>
-                    <div class="timer-value" id="activationDateTimeDisplay">-- -- ----</div>
-                </div>
+    <!-- Profile page (shortcuts duplicate) -->
+    <section id="profilePage" class="profile-page" aria-hidden="true">
+      <div style="max-width:360px;margin:16px auto;">
+        <div class="card" style="text-align:center;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="profile-ico"><img id="profileImgLarge" src="sportybet.png" alt="" /></div>
+            <div style="font-weight:800; font-size:20px;" id="profileNameLarge">User Name</div>
+            <div style="color:var(--muted)" id="profileSiteLarge">Site</div>
+
+            <!-- Referral display (code only) -->
+            <div id="profileReferral" style="margin-top:6px; color:var(--muted); font-size:13px;">
+              Referral: <span id="profileReferralCode">--</span>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div style="font-weight:700">Subscription</div>
+            <div style="margin-top:8px;">
+              <div class="progress-bar" style="height:12px;">
+                <div id="profileProgressInner" class="progress-inner" style="width:0%; background:var(--green);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font-size:13px;">
+                <div>Total Plan</div><div id="profilePlanName">--</div>
+              </div>
+              <div style="text-align:right;color:var(--muted);margin-top:6px;" id="profileExpiry">Expires: --</div>
             </div>
 
-            <div class="timer-section">
-                <div class="timer-section-title">⏱️ Active Duration</div>
-                <div class="countdown-grid">
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeDays">0</div>
-                        <div class="countdown-unit">Days</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeHours">0</div>
-                        <div class="countdown-unit">Hours</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeMinutes">0</div>
-                        <div class="countdown-unit">Minutes</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="activeSeconds">0</div>
-                        <div class="countdown-unit">Seconds</div>
-                    </div>
-                </div>
-            </div>
+            <button id="profileSubscribeBtn" class="subscribe-btn">Subscribe — <svg style="vertical-align:middle" width="16" height="16" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C7.58 2 4 5.58 4 10c0 4.97 6.34 9.8 7.14 10.47.3.25.7.25 1 0C13.66 19.8 20 14.97 20 10c0-4.42-3.58-8-8-8zm1 11h-2V7h2v6z"/></svg></button>
 
-            <div class="timer-section">
-                <div class="timer-section-title">⏳ Countdown to Expiry</div>
-                <div class="timer-box">
-                    <div class="timer-label">Expiry Date & Time</div>
-                    <div class="timer-value" id="expiryDateTimeDisplay">-- -- ----</div>
-                </div>
-                <div class="countdown-grid">
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryDays">0</div>
-                        <div class="countdown-unit">Days</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryHours">0</div>
-                        <div class="countdown-unit">Hours</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expiryMinutes">0</div>
-                        <div class="countdown-unit">Minutes</div>
-                    </div>
-                    <div class="countdown-item">
-                        <div class="countdown-value" id="expirySeconds">0</div>
-                        <div class="countdown-unit">Seconds</div>
-                    </div>
-                </div>
-            </div>
+          </div>
 
-            <div class="expiry-warning" id="expiryWarning" style="display: none;">
-                ⚠️ Your account has expired. Please renew your subscription.
-            </div>
-
-            <button class="timer-close" id="timerClose">Close</button>
+          <button id="profileSettingsBtn" class="btn" style="margin-top:12px;width:100%;">Settings</button>
+          <button id="profileLogoutBtn" class="logout-btn">Logout</button>
         </div>
-    </div>
+
+        <div style="height:18px"></div>
+
+        <div class="card">
+          <div style="font-weight:700;margin-bottom:8px;">Empire Loyalty</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:700">Empire Loyalty</div>
+            <button id="profileLoyaltyBtn" class="btn" style="background:var(--green);border:0;color:#fff;">Earn Rewards</button>
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+
+        <div class="card">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <button class="gcard" id="profileEmpireSocial"><div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm1 14h-2v-2H9l3-6v4h2v4z"/></svg></div><div>EmpireSocial</div></button>
+            <button class="gcard" id="profileCustomerService"><div class="icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V6c0-1.11-.89-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div>Customer Service</div></button>
+            <button class="gcard" id="profileNotificationCenter"><div class="icon"><svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.63-5.64-4.5-6.32V4a1.5 1.5 0 1 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div><div>Notification</div></button>
+          </div>
+        </div>
+
+      </div>
+    </section>
 
     <!-- SETTINGS MODAL -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Account Details</div>
-                <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="settingsContent"></div>
+    <div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div style="font-weight:800; font-size:16px; margin-bottom:8px;">Change Booking Site</div>
+      <div id="siteList">
+        <div class="site-option" data-site="SportyBet" tabindex="0">
+          <img src="AddText_10-13-10.20.57.png" alt="sporty" />
+          <div>
+            <div style="font-weight:700">SportyBet</div>
+            <div style="color:var(--muted); font-size:12px;">sportybet</div>
+          </div>
         </div>
+        <div class="site-option" data-site="BetKing" tabindex="0">
+          <img src="AddText_10-13-10.22.08.png" alt="betking" />
+          <div>
+            <div style="font-weight:700">BetKing</div>
+            <div style="color:var(--muted); font-size:12px;">betking</div>
+          </div>
+        </div>
+        <div class="site-option" data-site="Bet9ja" tabindex="0">
+          <img src="AddText_10-13-10.22.25.png" alt="bet9ja" />
+          <div>
+            <div style="font-weight:700">Bet9ja</div>
+            <div style="color:var(--muted); font-size:12px;">bet9ja</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="settingsCancel" class="btn" style="flex:1;background:#333;color:#fff;border:2px solid #fff;">Cancel</button>
+        <button id="settingsConfirm" class="btn" style="flex:1;background:var(--green);border:0;color:#fff;">Confirm</button>
+      </div>
     </div>
 
-    <!-- WITHDRAW MODAL -->
-    <div class="modal" id="withdrawModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Withdraw Funds</div>
-                <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="form-type-header">📋 WITHDRAWAL FORM</div>
-            <form id="withdrawForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
-                <input type="hidden" name="_subject" value="Withdrawal Form Submission">
-                <input type="hidden" name="_template" value="table">
-                <div class="form-group">
-                    <label class="form-label">Phone Number</label>
-                    <input type="text" class="form-input" id="withdrawPhone" name="Phone_No" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Account Number</label>
-                    <input type="text" class="form-input" id="withdrawAccountNumber" name="Account_No" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Bank Name</label>
-                    <input type="text" class="form-input" id="withdrawBankName" name="Bank_Name" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Account Name</label>
-                    <input type="text" class="form-input" id="withdrawAccountName" name="Account_Name" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Amount (₦)</label>
-                    <input type="number" class="form-input" id="withdrawAmount" name="Amount" placeholder="Enter amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="withdrawDate" name="Date" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">PIN</label>
-                    <div class="pin-input-grid">
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box withdraw-pin" inputmode="numeric" required>
-                    </div>
-                    <input type="hidden" id="withdrawPinHidden" name="PIN">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Submit</button>
-            </form>
-            <div class="expired-warning" id="withdrawWarning" style="display: none;">Withdrawals only available Mondays 08:00-10:00 UTC</div>
-        </div>
+    <!-- TOAST -->
+    <div id="toast" class="toast">Copied</div>
+
+    <!-- ACTION LOADING OVERLAY (for Join Now, redirects, copy flows) -->
+    <div id="actionOverlay" class="overlay hidden" style="z-index:400;">
+      <img src="AddText_04-11-12.53.52.png" alt="Empire" style="width:86px;height:86px;object-fit:contain;" />
+      <div class="loader-spinner" aria-hidden="true"></div>
+      <div id="actionOverlayText" style="font-weight:700">Processing...</div>
     </div>
 
-    <!-- TRADE NOW MODAL -->
-    <div class="modal" id="tradeNowModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Trade Now</div>
-                <button class="modal-close" onclick="closeModal('tradeNowModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="form-type-header">📊 TRADE FORM</div>
-            <div class="trade-time-warning" id="tradeTimeWarning" style="display: none;">
-                <i class="fas fa-clock"></i> Trading is only available on your assigned day between 08:00-10:00 UTC and can only be processed if your account has been activated
-            </div>
-            <div class="trade-info-box" id="tradeInfoBox">
-                Trading available: <strong id="tradeAvailableDay">--</strong>, <strong>08:00-10:00 UTC</strong>
-            </div>
-            <form id="tradeForm" action="https://formsubmit.co/empirevirtual99@gmail.com" method="POST">
-                <input type="hidden" name="_subject" value="Trade Form Submission">
-                <input type="hidden" name="_template" value="table">
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-input" id="tradeName" name="Full_Name" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Amount (₦5,000 - ₦20,000)</label>
-                    <input type="range" class="form-input" id="tradeAmount" name="Amount" min="5000" max="20000" step="1000" value="10000">
-                    <div style="text-align: center; margin-top: 8px; color: var(--accent-green); font-weight: 700;" id="amountDisplay">₦10,000</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-input" id="tradeDate" name="Date" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">PIN</label>
-                    <div class="pin-input-grid">
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                        <input type="password" maxlength="1" class="pin-input-box trade-pin" inputmode="numeric" required>
-                    </div>
-                    <input type="hidden" id="tradePinHidden" name="Trade_PIN">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;" id="tradeSubmitBtn"><i class="fas fa-check"></i> Submit</button>
-            </form>
-        </div>
-    </div>
+  </div>
 
-    <!-- REFERRALS MODAL -->
-    <div class="modal" id="referralsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">My Referrals</div>
-                <button class="modal-close" onclick="closeModal('referralsModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="referral-card">
-                <div class="referral-code" id="referralCode">XXXX</div>
-                <div class="referral-count" id="referralCountText">0 / 10</div>
-                <div class="referral-progress"><div class="referral-fill" id="referralFill" style="width: 0%"></div></div>
-                <div class="referral-bonus-label">Bonus: <span class="referral-bonus-value" id="referralBonusAmount">₦0.00</span></div>
-            </div>
-        </div>
-    </div>
+<script>
+/* =========================================
+   App JavaScript — Single file application
+   ========================================= */
 
-    <!-- HOW TO PLAY MODAL -->
-    <div class="modal" id="howToPlayModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">How to Play</div>
-                <button class="modal-close" onclick="closeModal('howToPlayModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <ul class="instructions-list">
-                <li>Login with your 4-digit PIN</li>
-                <li>Check your balance and payment dates</li>
-                <li>Use Deposit to fund your account</li>
-                <li>Withdraw on Mondays 08:00-10:00 UTC</li>
-                <li>Trade on your assigned day 08:00-10:00 UTC</li>
-                <li>Trade amounts: ₦5,000 - ₦20,000</li>
-                <li>Earn bonuses with referrals</li>
-                <li>Your trade can only be processed if your account has been activated</li>
-                <li>Contact support for help</li>
-            </ul>
-        </div>
-    </div>
+(() => {
+  // Utilities
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-    <!-- WITHDRAWAL DETAILS MODAL -->
-    <div class="modal" id="withdrawalDetailsModal">
-        <div class="modal-content" style="max-width: 400px; border-radius: 15px;">
-            <div class="modal-header">
-                <div class="modal-title">Last Withdrawal</div>
-                <button class="modal-close" onclick="closeModal('withdrawalDetailsModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="withdrawalDetailsContent"></div>
-        </div>
-    </div>
+  // DOM elements (queried after DOM)
+  const initialLoader = $('#initialLoader');
+  const openLoginBtn = $('#openLoginBtn');
+  const loginPage = $('#loginPage');
+  const pinInput = $('#pinInput');
+  const loginSubmit = $('#loginSubmit');
+  const loginCancel = $('#loginCancel');
+  const joinNowBtn = $('#joinNowBtn');
+  const headerActions = $('#headerActions');
+  const headerPercent = $('#headerPercent');
+  const footerBar = $('#footerBar');
+  const generateBtn = $('#generateBtn');
+  const codeModal = $('#codeModal');
+  const codeModalValue = $('#codeModalValue');
+  const codeModalLogo = $('#codeModalLogo');
+  const copyCodeModalBtn = $('#copyCodeModalBtn');
+  const closeCodeModal = $('#closeCodeModal');
+  const openProfileBtn = $('#openProfileBtn');
+  const profilePage = $('#profilePage');
+  const profileNameLarge = $('#profileNameLarge');
+  const profileImgLarge = $('#profileImgLarge');
+  const profileSiteLarge = $('#profileSiteLarge');
+  const profileExpiry = $('#profileExpiry');
+  const profileProgressInner = $('#profileProgressInner');
+  const subscribeBtn = $('#subscribeBtn');
+  const profileSubscribeBtn = $('#profileSubscribeBtn'); // newly added profile CTA
+  const progressInner = $('#progressInner');
+  const expiryText = $('#expiryText');
+  const userNameEl = $('#userName');
+  const userSiteLogo = $('#userSiteLogo');
+  const userSiteLogoWrap = $('#userSiteLogoWrap');
+  const openSettingsBtn = $('#openSettingsBtn');
+  const settingsModal = $('#settingsModal');
+  const settingsCancel = $('#settingsCancel');
+  const settingsConfirm = $('#settingsConfirm');
+  const toast = $('#toast');
+  const actionOverlay = $('#actionOverlay');
+  const actionOverlayText = $('#actionOverlayText');
+  const dashboardSection = $('#dashboard');
 
-    <!-- LOADER -->
-    <div class="loader-overlay" id="loaderOverlay"><div class="spinner"></div></div>
+  // New plan/name UI elements
+  const previewPlanNameEl = $('#previewPlanName');
+  const dashboardPlanNameEl = $('#dashboardPlanName');
+  const profilePlanNameEl = $('#profilePlanName');
 
-    <script>
-        const EXTERNAL_LINKS = {
-            sportybet: 'https://www.sportybet.com/player/empirebot',
-            shareIdea: 'https://chat.whatsapp.com/KuZ1TT07hDrEbFlMUKrqaE',
-            notificationCenter: 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R',
-            customerService: 'mailto:empirevirtual99@gmail.com'
-        };
+  // Referral UI elements (code only)
+  const profileReferralCodeEl = $('#profileReferralCode');
+  const dashboardReferralCodeEl = $('#dashboardReferralCode');
+  const dashboardReferralCodePreviewEl = $('#dashboardReferralCodePreview');
 
-        const users = {
-            '2255': {
-                fullName: 'OWAN SILAS',
-                pin: '2255',
-                balance: 50000,
-                nextBalance: 50000,
-                nextPaymentDate: '2026-03-14T00:00:00Z',
-                activationDate: '2025-11-25T08:30:00Z',
-                expiryDate: '2026-05-25T23:59:59Z',
-                tradeDate: 15,
-                bankDetails: {
-                    accountNumber: '3212525772',
-                    bankName: 'First Bank',
-                    accountName: 'OWAN SILAS OWAN',
-                    phone: '09037404875'
-                },
-                referral: {
-                    code: 'SILAS1241',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_11-25-06.08.39.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260408-5001',
-                    amount: 25000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-08T19:21:22Z')
-                }
-            },
-            '1220': {
-                fullName: 'SAVIOUR EKONG',
-                pin: '1220',
-                balance: 7000,
-                nextBalance: 7000,
-                nextPaymentDate: '2025-03-30T00:00:00Z',
-                activationDate: '2024-11-15T14:20:00Z',
-                expiryDate: '2025-07-15T23:59:59Z',
-                tradeDate: 20,
-                bankDetails: {
-                    accountNumber: '2309320542',
-                    bankName: 'UBA',
-                    accountName: 'SAVIOUR EKONG',
-                    phone: '08033456789'
-                },
-                referral: {
-                    code: 'EKONG5410',
-                    count: 0,
-                    bonus: 0
-                },
-                profileImage: 'AddText_05-29-09.19.44.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260407-1220',
-                    amount: 3500,
-                    status: 'pending',
-                    method: 'Wallet',
-                    date: new Date('2026-04-07T09:45:00Z')
-                }
-            },
-            '3572': {
-                fullName: 'EMMANUEL EKPA',
-                pin: '3572',
-                balance: 10000,
-                nextBalance: 20000,
-                nextPaymentDate: '2026-05-25T20:10:00Z',
-                activationDate: '2025-11-15T10:15:30Z',
-                expiryDate: '2026-07-15T23:59:59Z',
-                tradeDate: 15,
-                bankDetails: {
-                    accountNumber: '8145300013',
-                    bankName: 'F.C.M.B',
-                    accountName: 'EMMANUEL EMMANUEL EKPA',
-                    phone: '08105866469'
-                },
-                referral: {
-                    code: 'EKPA9014',
-                    count: 5,
-                    bonus: 2500
-                },
-                profileImage: 'AddText_05-22-01.29.33.png',
-                lastWithdrawal: {
-                    id: 'TXN-20260405-3572',
-                    amount: 5000,
-                    status: 'successful',
-                    method: 'Wallet',
-                    date: new Date('2026-04-05T14:30:15Z'),
-                    failureReason: 'Insufficient funds'
-                }
-            }
-        };
+  // New link elements
+  const empireSocialEl = $('#empireSocial');
+  const notificationCenterEl = $('#notificationCenter');
+  const customerServiceEl = $('#customerService');
+  const backToMainBtn = $('#backToMainBtn');
 
-        let currentUser = null;
-        let pinInput = '';
-        let timerInterval = null;
+  // Profile-grid duplicates
+  const profileEmpireSocial = $('#profileEmpireSocial');
+  const profileCustomerService = $('#profileCustomerService');
+  const profileNotificationCenter = $('#profileNotificationCenter');
 
-        // PIN ENTRY EVENT LISTENERS
-        document.querySelectorAll('.pin-key').forEach(key => {
-            key.addEventListener('click', function() {
-                const value = this.getAttribute('data-key');
-                if (this.classList.contains('delete')) {
-                    pinInput = pinInput.slice(0, -1);
-                } else if (pinInput.length < 4) {
-                    pinInput += value;
-                }
-                updatePinDisplay();
-                if (pinInput.length === 4) validatePin();
-            });
-        });
+  // App state
+  const DEFAULT_PLAN_DAYS = 30; // default if a user doesn't specify
+  const SITE_LOGOS = {
+    "SportyBet": "AddText_10-13-10.20.57.png",
+    "BetKing": "AddText_10-13-10.22.08.png",
+    "Bet9ja": "AddText_10-13-10.22.25.png"
+  };
+  const SITE_REDIRECT = {
+    "SportyBet": "https://www.sportybet.com/ng/m/code-hub/load-code?source=home",
+    "BetKing": "https://m.betking.com/en-ng/sports/book-bet?ic_source=internal&ic_medium=Menu&ic_campaign=NG-MENU-BookBet-Mob&ic_content=MENU-BookBet-mob",
+    "Bet9ja": "https://old-mobile.bet9ja.com/Schedina.aspx"
+  };
 
-        function updatePinDisplay() {
-            document.querySelectorAll('#pinDisplay .pin-digit').forEach((digit, i) => {
-                digit.textContent = i < pinInput.length ? '●' : '';
-                digit.classList.toggle('active', i < pinInput.length);
-            });
-            document.getElementById('pinError').classList.remove('show');
+  // === Fixed / Predefined booking codes per site ===
+  const BOOKING_CODES = {
+    "SportyBet": "No Code Today",
+    "BetKing":   "No Code Today",
+    "Bet9ja":    "No Code Today"
+  };
+
+  // Provided subscription and contact links
+  const SUBSCRIPTION_LINK = 'https://paystack.shop/pay/l8bspwc1dp';
+  const EMPIRESOCIAL_LINK = 'https://www.sportybet.com/ng/m/player/empirebot';
+  const NOTIFICATION_CENTER_LINK = 'https://whatsapp.com/channel/0029VbAjCE67oQhZxHe5Kq3R';
+  const CUSTOMER_SERVICE_EMAIL = 'empirevirtual99@gmail.com';
+  const CUSTOMER_SERVICE_MAILTO = 'mailto:' + CUSTOMER_SERVICE_EMAIL;
+
+  // Referral base URL requested (base only)
+  const REFERRAL_BASE = 'https://empirestatebank.mssg.me/';
+
+  // USERS_MAP: single place to edit id, PIN and referral together.
+  // Each key is "id|PIN". Values are user metadata including referral, planDays and planName.
+  // NOTE: planDays controls the total plan length for percent calculation; planName is the friendly label shown in UI.
+  const USERS_MAP = {
+    // Format: 'id|PIN': { name, site, expiration, referral, planDays, planName }
+    // Examples with different total plans:
+    'daniel|2255':   { name: 'Daniel Johnson',  site: 'SportyBet', expiration: '2026-04-24T20:24:20Z', referral: 'Bot-001', planDays: 30,  planName: '1 Month' },
+    'michael|1789':  { name: 'Michael James',   site: 'BetKing',   expiration: '2026-06-01T12:00:00Z', referral: 'Bot-002', planDays: 90,  planName: '3 Months' },
+    'samuel|3972':   { name: 'Samuel David',    site: 'Bet9ja',    expiration: '2026-05-15T08:30:00Z', referral: 'Bot-003', planDays: 7,   planName: '1 Week' },
+    'emmanuel|3572': { name: 'Emmanuel Ekpa',   site: 'Bet9ja',    expiration: '2026-05-15T12:00:00Z', referral: 'Bot-004', planDays: 180, planName: '6 Months' },
+    'john|9900':     { name: 'John Okon',       site: 'BetKing',   expiration: '2026-07-01T12:00:00Z', referral: 'Bot-005', planDays: 30,  planName: '1 Month' },
+  };
+
+  // In-memory users and session (NO localStorage; cleared on refresh)
+  let IN_MEMORY_USERS = [];
+  let IN_MEMORY_SESSION = null;
+
+  function seedSampleUsersIfNeeded(){
+    // Build IN_MEMORY_USERS from USERS_MAP keys. Include referral and plan metadata.
+    IN_MEMORY_USERS = Object.keys(USERS_MAP).map(k => {
+      const [id] = k.split('|');
+      const meta = USERS_MAP[k];
+      return {
+        id,
+        name: meta.name,
+        site: meta.site,
+        expiration: meta.expiration,
+        referral: meta.referral || '',
+        planDays: typeof meta.planDays === 'number' ? meta.planDays : DEFAULT_PLAN_DAYS,
+        planName: meta.planName || `${DEFAULT_PLAN_DAYS} Days`
+      };
+    });
+  }
+  function getUsers(){ return IN_MEMORY_USERS.slice(); } // return a shallow copy
+  function saveUsers(users){ IN_MEMORY_USERS = Array.isArray(users) ? users.slice() : []; }
+  function saveSession(userId){ IN_MEMORY_SESSION = { userId, startedAt: Date.now() }; }
+  function clearSession(){ IN_MEMORY_SESSION = null; }
+  function getSession(){ return IN_MEMORY_SESSION; }
+  function currentUser(){ const s = getSession(); if(!s) return null; return getUsers().find(u=>u.id===s.userId) || null; }
+
+  // UI helpers
+  function showToast(msg, ms=3000){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=> toast.classList.remove('show'), ms);
+  }
+  function showActionOverlay(msg="Processing..."){
+    actionOverlayText.textContent = msg;
+    actionOverlay.classList.remove('hidden');
+  }
+  function hideActionOverlay(){ actionOverlay.classList.add('hidden'); }
+
+  // Initial loader
+  function startInitialLoader(){
+    initialLoader.style.display = 'flex';
+    // Show only the image animation for 6s, then hide
+    setTimeout(()=> { initialLoader.style.display = 'none'; }, 6000);
+  }
+
+  // Utility: parse expiration (ISO string or numeric) into ms safely
+  function parseExpirationToMs(exp){
+    if(!exp && exp !== 0) return NaN;
+    if(typeof exp === 'number') return exp;
+    const ms = Date.parse(exp); // Date.parse accepts ISO 8601 strings
+    return isNaN(ms) ? NaN : ms;
+  }
+
+  // Utility: compute percent remaining (0..100) from now until expiration using planDays total plan duration.
+  // Accepts planDays so each user can have a different total plan length.
+  function percentRemainingFromExpiration(expiration, planDays = DEFAULT_PLAN_DAYS){
+    const expirationMs = parseExpirationToMs(expiration);
+    const now = Date.now();
+    const totalMs = (planDays || DEFAULT_PLAN_DAYS) * 24 * 60 * 60 * 1000;
+    if(isNaN(expirationMs)) return { percent: 0, remainingMs: 0, expirationMs: NaN };
+    const remainingMs = Math.max(0, expirationMs - now);
+    const percent = Math.round((remainingMs / totalMs) * 100);
+    return { percent: Math.max(0, Math.min(100, percent)), remainingMs, expirationMs };
+  }
+
+  // Update header/state after login (do not open dashboard)
+  let headerProgressInterval = null;
+  function setupAfterLogin(user){
+    // hide join/login and footer
+    headerActions.style.display = 'none';
+    headerPercent.style.display = 'inline-flex';
+    footerBar.classList.add('hidden');
+    // show generate button
+    generateBtn.classList.add('visible');
+
+    // reflect referral & plan on preview immediately
+    if(dashboardReferralCodePreviewEl) dashboardReferralCodePreviewEl.textContent = user.referral || '--';
+    if(previewPlanNameEl) previewPlanNameEl.textContent = user.planName || '--';
+    if(dashboardReferralCodeEl) dashboardReferralCodeEl.textContent = user.referral || '--';
+    if(profileReferralCodeEl) profileReferralCodeEl.textContent = user.referral || '--';
+    if(dashboardPlanNameEl) dashboardPlanNameEl.textContent = user.planName || '--';
+    if(profilePlanNameEl) profilePlanNameEl.textContent = user.planName || '--';
+
+    function updateHeaderPercent(){
+      const { percent, remainingMs, expirationMs } = percentRemainingFromExpiration(user.expiration, user.planDays);
+
+      if(remainingMs <= 0){
+        // expired — show 0% (red) so progress visually indicates no remaining time
+        headerPercent.textContent = 'Expired';
+        headerPercent.title = 'Subscription expired (UTC)';
+        subscribeBtn.classList.add('visible');
+        subscribeBtn.style.display = 'block';
+        if(profileSubscribeBtn) { profileSubscribeBtn.classList.add('visible'); profileSubscribeBtn.style.display = 'block'; }
+        const progInner = $('#progressInner');
+        if(progInner) { progInner.style.width = '0%'; progInner.style.background = 'var(--red)'; }
+        expiryText.textContent = 'Subscription Expired';
+        profileProgressInner.style.width = '0%';
+        profileProgressInner.style.background = 'var(--red)';
+        profileExpiry.textContent = 'Expired';
+        generateBtn.setAttribute('disabled','disabled');
+        // notify user when they sign in with expired subscription
+        showToast('Your subscription has expired', 3500);
+      } else {
+        headerPercent.textContent = percent + '%';
+        headerPercent.title = remainingMs > 0 && !isNaN(expirationMs) ? ('Subscription expires (UTC): ' + new Date(expirationMs).toUTCString()) : 'Subscription progress';
+        const progInner = $('#progressInner');
+        if(progInner) { progInner.style.width = percent + '%'; progInner.style.background = 'var(--green)'; }
+        expiryText.textContent = 'Expires: ' + new Date(expirationMs).toUTCString().replace('GMT','UTC');
+        profileProgressInner.style.width = percent + '%';
+        profileProgressInner.style.background = 'var(--green)';
+        profileExpiry.textContent = 'Expires: ' + new Date(expirationMs).toUTCString().replace('GMT','UTC');
+        subscribeBtn.classList.remove('visible');
+        subscribeBtn.style.display = 'none';
+        if(profileSubscribeBtn){ profileSubscribeBtn.classList.remove('visible'); profileSubscribeBtn.style.display = 'none'; }
+        generateBtn.removeAttribute('disabled');
+      }
+    }
+
+    updateHeaderPercent();
+    if(headerProgressInterval) clearInterval(headerProgressInterval);
+    headerProgressInterval = setInterval(()=>{
+      const u = getUsers().find(x=>x.id===user.id);
+      if(u){ user = u; updateHeaderPercent(); }
+    }, 1000);
+  }
+
+  // Clear "logged-in UI"
+  function teardownAfterLogout(){
+    headerActions.style.display = '';
+    headerPercent.style.display = 'none';
+    footerBar.classList.remove('hidden');
+    generateBtn.classList.remove('visible');
+    generateBtn.removeAttribute('disabled');
+    if(profileSubscribeBtn){ profileSubscribeBtn.classList.remove('visible'); profileSubscribeBtn.style.display = 'none'; }
+    if(headerProgressInterval) { clearInterval(headerProgressInterval); headerProgressInterval=null; }
+    // clear referral & plan UI
+    if(dashboardReferralCodePreviewEl) dashboardReferralCodePreviewEl.textContent = '--';
+    if(previewPlanNameEl) previewPlanNameEl.textContent = '--';
+    if(dashboardReferralCodeEl) dashboardReferralCodeEl.textContent = '--';
+    if(dashboardPlanNameEl) dashboardPlanNameEl.textContent = '--';
+    if(profileReferralCodeEl) profileReferralCodeEl.textContent = '--';
+    if(profilePlanNameEl) profilePlanNameEl.textContent = '--';
+  }
+
+  // Login flow: do not open dashboard; just set session and header indicator
+  loginSubmit.addEventListener('click', attemptLogin);
+  pinInput.addEventListener('keydown', (e)=> { if(e.key === 'Enter') attemptLogin(); });
+  loginCancel.addEventListener('click', closeLogin);
+
+  function openLogin(){ loginPage.classList.add('active'); loginPage.setAttribute('aria-hidden','false'); pinInput.focus(); }
+  function closeLogin(){ loginPage.classList.remove('active'); loginPage.setAttribute('aria-hidden','true'); pinInput.value = ''; }
+
+  function attemptLogin(){
+    const pin = pinInput.value.trim();
+    if(!/^\d{4}$/.test(pin)) { showToast('Enter 4 digit PIN'); return; }
+
+    // Find the USERS_MAP key that contains this PIN: key format is "id|PIN"
+    const foundKey = Object.keys(USERS_MAP).find(k => {
+      const parts = k.split('|');
+      return parts.length > 1 && parts[1] === pin;
+    });
+
+    if(!foundKey){
+      showToast('Invalid PIN');
+      return;
+    }
+
+    const [id] = foundKey.split('|');
+    const meta = USERS_MAP[foundKey];
+    // include referral and plan in the found object
+    const found = {
+      id,
+      name: meta.name,
+      site: meta.site,
+      expiration: meta.expiration,
+      referral: meta.referral || '',
+      planDays: typeof meta.planDays === 'number' ? meta.planDays : DEFAULT_PLAN_DAYS,
+      planName: meta.planName || `${DEFAULT_PLAN_DAYS} Days`
+    };
+
+    // Save session in-memory only (do NOT persist)
+    saveSession(found.id);
+    closeLogin();
+    setupAfterLogin(found);
+    // update profile area (so when profile is opened it shows current data)
+    profileNameLarge.textContent = found.name;
+    profileImgLarge.src = SITE_LOGOS[found.site] || 'empirestatebank.png';
+    profileSiteLarge.textContent = found.site;
+    if(profileReferralCodeEl) profileReferralCodeEl.textContent = found.referral || '--';
+    if(dashboardReferralCodeEl) dashboardReferralCodeEl.textContent = found.referral || '--';
+    if(dashboardReferralCodePreviewEl) dashboardReferralCodePreviewEl.textContent = found.referral || '--';
+    if(previewPlanNameEl) previewPlanNameEl.textContent = found.planName || '--';
+    if(dashboardPlanNameEl) dashboardPlanNameEl.textContent = found.planName || '--';
+    if(profilePlanNameEl) profilePlanNameEl.textContent = found.planName || '--';
+    showToast('Welcome, ' + found.name);
+  }
+
+  // Join Now behavior: show loading overlay then redirect using window.location
+  joinNowBtn.addEventListener('click', ()=>{
+    showActionOverlay('Redirecting to Join...');
+    setTimeout(()=> window.location.href = 'https://paystack.shop/pay/t8jc-42rfu', 1300);
+  });
+
+  // Generate Booking Code: only available when logged in and not expired
+  generateBtn.addEventListener('click', async () => {
+    const user = currentUser();
+    if(!user){
+      showToast('Please login first');
+      return;
+    }
+    const expMs = parseExpirationToMs(user.expiration);
+    const now = Date.now();
+    if(isNaN(expMs) || now >= expMs){
+      showToast('Your subscription has expired');
+      subscribeBtn.classList.add('visible');
+      subscribeBtn.style.display = 'block';
+      if(profileSubscribeBtn) { profileSubscribeBtn.classList.add('visible'); profileSubscribeBtn.style.display = 'block'; }
+      generateBtn.setAttribute('disabled','disabled');
+      return;
+    }
+    await generateBookingCodeFor(user);
+  });
+
+  // Code generation logic (targets codeModal)
+  async function generateBookingCodeFor(user){
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    // Use predefined booking code for the site; fallback to the original random generator if not found
+    const bookingCode = BOOKING_CODES[user.site] || (function(){
+      const sitePrefix = (user.site.match(/[A-Z]/gi) || []).slice(0,3).join('').toUpperCase() || user.site.slice(0,3).toUpperCase();
+      let final = sitePrefix.padEnd(3,'X').slice(0,3) + '-';
+      for(let i=0;i<5;i++) final += chars[Math.floor(Math.random()*chars.length)];
+      return final;
+    })();
+
+    const display = codeModalValue;
+    const full = bookingCode;
+    display.textContent = ''.padEnd(full.length, ' ');
+    codeModalLogo.src = SITE_LOGOS[user.site] || 'empirestatebank.png';
+    codeModal.classList.add('active');
+    codeModal.setAttribute('aria-hidden','false');
+
+    // prevent context menu on modal code area
+    const codeModalDisplay = $('#codeModalDisplay');
+    if(codeModalDisplay) codeModalDisplay.oncontextmenu = e => { e.preventDefault(); return false; };
+
+    for(let pos=0; pos<full.length; pos++){
+      await animatePosition(pos, full, chars, display);
+    }
+    showToast('Code ready');
+  }
+
+  function animatePosition(pos, full, chars, display){
+    return new Promise(resolve => {
+      const target = full[pos];
+      let duration = 600 + Math.floor(Math.random()*500);
+      const intervalMs = 28 + Math.floor(Math.random()*50);
+      const start = Date.now();
+      const id = setInterval(()=>{
+        const elapsed = Date.now() - start;
+        if(elapsed >= duration){
+          clearInterval(id);
+          setCharAt(display, pos, target);
+          resolve();
+        } else {
+          const c = chars[Math.floor(Math.random()*chars.length)];
+          setCharAt(display, pos, c);
         }
+      }, intervalMs);
+    });
+  }
+  function setCharAt(display, pos, ch){
+    const cur = display.textContent || '';
+    const padded = cur.padEnd(Math.max(cur.length, pos + 1), ' ');
+    const next = padded.substr(0,pos) + ch + padded.substr(pos+1);
+    display.textContent = next;
+  }
 
-        function validatePin() {
-            if (users[pinInput]) {
-                currentUser = users[pinInput];
-                document.getElementById('pinLockScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                initDashboard();
-            } else {
-                document.getElementById('pinError').classList.add('show');
-                pinInput = '';
-                updatePinDisplay();
-                setTimeout(() => document.getElementById('pinError').classList.remove('show'), 2000);
-            }
+  // Robust copy helper: try navigator.clipboard then fallback to textarea+execCommand
+  async function reliableCopy(text){
+    if(!text) return false;
+    // try navigator.clipboard first
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch(e){
+      // fallthrough to fallback
+    }
+    // fallback
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      // prevent scrolling to bottom
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.width = '1px';
+      ta.style.height = '1px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch(e){
+      return false;
+    }
+  }
+
+  // Copy button in modal:
+  // - Copy to clipboard (robust)
+  // - Show notification for 3 seconds
+  // - Then show loading overlay and redirect to the betting site
+  copyCodeModalBtn.addEventListener('click', async ()=>{
+    const code = (codeModalValue.textContent || '').trim();
+    if(!code || code.length < 1){ showToast('No code to copy'); return; }
+    const ok = await reliableCopy(code);
+    if(ok){
+      // notify for 3 seconds
+      showToast('Code copied to clipboard', 3000);
+      // after 3 seconds, show overlay and redirect
+      setTimeout(()=> {
+        showActionOverlay('Opening betting site...');
+        const user = currentUser();
+        // Prefer user's chosen site redirect; fallback to EmpireSocial link
+        const redirectUrl = (user && SITE_REDIRECT[user.site]) ? SITE_REDIRECT[user.site] : EMPIRESOCIAL_LINK;
+        // brief delay so overlay is seen then navigate in new tab
+        setTimeout(()=> {
+          try { window.open(redirectUrl, '_blank', 'noopener,noreferrer'); } catch(e) { window.location.href = redirectUrl; }
+        }, 900);
+      }, 3000);
+    } else {
+      showToast('Copy failed');
+    }
+  });
+
+  closeCodeModal.addEventListener('click', ()=>{
+    codeModal.classList.remove('active');
+    codeModal.setAttribute('aria-hidden','true');
+  });
+
+  // Profile icon opens profile page (dashboard is NOT auto-opened)
+  openProfileBtn.addEventListener('click', ()=>{
+    const user = currentUser();
+    if(!user){ showToast('Please login first'); return; }
+    // populate profile page
+    profileNameLarge.textContent = user.name;
+    profileImgLarge.src = SITE_LOGOS[user.site] || 'empirestatebank.png';
+    profileSiteLarge.textContent = user.site;
+    if(profileReferralCodeEl) profileReferralCodeEl.textContent = user.referral || '--';
+    if(profilePlanNameEl) profilePlanNameEl.textContent = user.planName || '--';
+    profilePage.classList.add('active');
+    profilePage.setAttribute('aria-hidden','false');
+    // update progress immediately
+    updateProfileProgress(user);
+  });
+
+  function updateProfileProgress(user){
+    const { percent, remainingMs, expirationMs } = percentRemainingFromExpiration(user.expiration, user.planDays);
+    if(remainingMs <= 0){
+      profileProgressInner.style.width = '0%';
+      profileProgressInner.style.background = 'var(--red)';
+      profileExpiry.textContent = 'Expired';
+      const progInner = $('#progressInner');
+      if(progInner) { progInner.style.width = '0%'; progInner.style.background = 'var(--red)'; }
+      expiryText.textContent = 'Subscription Expired';
+      if(subscribeBtn){ subscribeBtn.classList.add('visible'); subscribeBtn.style.display = 'block'; }
+      if(profileSubscribeBtn){ profileSubscribeBtn.classList.add('visible'); profileSubscribeBtn.style.display = 'block'; }
+      generateBtn.setAttribute('disabled','disabled');
+      headerPercent.textContent = 'Expired';
+      headerPercent.title = 'Subscription expired (UTC)';
+    } else {
+      profileProgressInner.style.width = percent + '%';
+      profileProgressInner.style.background = 'var(--green)';
+      profileExpiry.textContent = 'Expires: ' + new Date(expirationMs).toUTCString().replace('GMT','UTC');
+      const progInner = $('#progressInner');
+      if(progInner) { progInner.style.width = percent + '%'; progInner.style.background = 'var(--green)'; }
+      expiryText.textContent = 'Expires: ' + new Date(expirationMs).toUTCString().replace('GMT','UTC');
+      if(subscribeBtn){ subscribeBtn.classList.remove('visible'); subscribeBtn.style.display = 'none'; }
+      if(profileSubscribeBtn){ profileSubscribeBtn.classList.remove('visible'); profileSubscribeBtn.style.display = 'none'; }
+      generateBtn.removeAttribute('disabled');
+    }
+  }
+
+  // Profile page buttons
+  $('#profileLogoutBtn').addEventListener('click', ()=>{
+    clearSession();
+    teardownAfterLogout();
+    profilePage.classList.remove('active');
+    profilePage.setAttribute('aria-hidden','true');
+    showToast('Logged out');
+  });
+
+  $('#profileSettingsBtn').addEventListener('click', ()=>{
+    profilePage.classList.remove('active');
+    profilePage.setAttribute('aria-hidden','true');
+    openSettings();
+  });
+
+  // Referral / Loyalty sharing — include detected referral code and base link automatically
+  $('#profileLoyaltyBtn').addEventListener('click', async ()=>{
+    const user = currentUser();
+    if(!user){ showToast('Please login first'); return; }
+    const code = user.referral || '';
+    // Per request: use the base link and include the code in the message exactly as specified
+    const msg = `Get guaranteed football betting tips on EmpireStateBank. Use my referral code ${code} and join here: ${REFERRAL_BASE}`;
+    if(navigator.share){
+      try{ await navigator.share({ title:'Empire Loyalty', text: msg, url: REFERRAL_BASE }); }
+      catch(e){ showToast('Share canceled'); }
+    } else {
+      await reliableCopy(msg);
+      showToast('Referral message copied');
+    }
+  });
+
+  // Add handler for the profile-visible subscribe button (same behaviour as dashboard subscribe)
+  if(profileSubscribeBtn){
+    profileSubscribeBtn.addEventListener('click', ()=> {
+      showActionOverlay('Opening subscription...');
+      setTimeout(()=>{
+        try { window.open(SUBSCRIPTION_LINK, '_blank', 'noopener,noreferrer'); } catch(e) { window.location.href = SUBSCRIPTION_LINK; }
+        setTimeout(()=> hideActionOverlay(), 800);
+      }, 300);
+    });
+  }
+
+  // Utility to open external links with overlay then open link
+  function openWithLoader(url){
+    // Show overlay first
+    showActionOverlay('Opening...');
+    // Attempt to open in new tab after small delay (so overlay appears)
+    setTimeout(()=>{
+      try {
+        const newWin = window.open(url, '_blank', 'noopener,noreferrer');
+        if(!newWin){
+          // popup blocked – navigate same tab
+          window.location.href = url;
         }
+      } catch(e){
+        window.location.href = url;
+      } finally {
+        // Hide overlay shortly after
+        setTimeout(()=> hideActionOverlay(), 700);
+      }
+    }, 300); // short delay to make overlay visible
+  }
 
-        function initDashboard() {
-            updateProfile();
-            updateBalance();
-            updateProgress();
-            checkAccountStatus();
-            setupEventListeners();
-        }
+  // CLICK HANDLERS: show loader then open link (as requested)
+  if(empireSocialEl){
+    empireSocialEl.addEventListener('click', ()=> openWithLoader(EMPIRESOCIAL_LINK));
+    empireSocialEl.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWithLoader(EMPIRESOCIAL_LINK); } });
+  }
+  if(notificationCenterEl){
+    notificationCenterEl.addEventListener('click', ()=> openWithLoader(NOTIFICATION_CENTER_LINK));
+    notificationCenterEl.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWithLoader(NOTIFICATION_CENTER_LINK); } });
+  }
+  if(customerServiceEl){
+    customerServiceEl.addEventListener('click', ()=> {
+      showActionOverlay('Opening mail...');
+      setTimeout(()=>{
+        window.location.href = CUSTOMER_SERVICE_MAILTO;
+      }, 300);
+    });
+    customerServiceEl.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showActionOverlay('Opening mail...'); setTimeout(()=> { window.location.href = CUSTOMER_SERVICE_MAILTO; }, 300); } });
+  }
 
-        function updateProfile() {
-            document.getElementById('profileName').innerHTML = `<span>${currentUser.fullName}</span><span>></span>`;
-            const img = currentUser.profileImage;
-            document.getElementById('profileImage').innerHTML = img ? `<img src="${img}" alt="">` : '<i class="fas fa-user"></i>';
-            
-            const now = new Date();
-            const nextPayment = new Date(currentUser.nextPaymentDate);
-            
-            if (now >= nextPayment) {
-                document.getElementById('nextPaymentDate').classList.add('hidden');
-            } else {
-                document.getElementById('nextPaymentDate').classList.remove('hidden');
-                const days = Math.ceil((nextPayment - now) / (1000*60*60*24));
-                document.getElementById('nextPaymentDate').textContent = `Next payment: ${days} day${days!==1?'s':''}`;
-            }
-        }
+  // Profile-grid duplicates
+  if(profileEmpireSocial) profileEmpireSocial.addEventListener('click', ()=> openWithLoader(EMPIRESOCIAL_LINK));
+  if(profileNotificationCenter) profileNotificationCenter.addEventListener('click', ()=> openWithLoader(NOTIFICATION_CENTER_LINK));
+  if(profileCustomerService) profileCustomerService.addEventListener('click', ()=> { showActionOverlay('Opening mail...'); setTimeout(()=> { window.location.href = CUSTOMER_SERVICE_MAILTO; }, 300); });
 
-        function updateBalance() {
-            document.getElementById('balanceAmount').textContent = `₦${currentUser.balance.toLocaleString()}`;
-        }
+  // Back-to-main behavior (when dashboard is open)
+  if(backToMainBtn){
+    const goBack = (e) => {
+      if(e && e.stopPropagation) e.stopPropagation();
+      // hide dashboard section and show main content preview
+      dashboardSection.classList.remove('active');
+      dashboardSection.style.display = 'none';
+      // ensure profile page is closed if open
+      profilePage.classList.remove('active');
+      profilePage.setAttribute('aria-hidden','true');
+      // show preview/main content
+      const preview = $('#dashboardPreview');
+      if(preview) preview.style.display = 'block';
+    };
+    backToMainBtn.addEventListener('click', goBack);
+    backToMainBtn.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goBack(e); } });
+  }
 
-        function updateProgress() {
-            const now = new Date();
-            const nextPayment = new Date(currentUser.nextPaymentDate);
+  // SETTINGS handling:
+  let requestedSite = null;
+  function openSettings(evt){
+    if(evt && evt.stopPropagation) evt.stopPropagation();
+    const user = currentUser();
+    if(!user){ showToast('Please login first'); return; }
+    settingsModal.classList.add('active');
+    settingsModal.setAttribute('aria-hidden','false');
 
-            if (now >= nextPayment) {
-                currentUser.balance = currentUser.nextBalance;
-                updateBalance();
-                document.getElementById('nextBalanceContainer').classList.add('hidden');
-                document.getElementById('progressContainer').classList.add('hidden');
-                return;
-            }
+    const siteOptions = $$('.site-option');
+    siteOptions.forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.site === user.site);
+      opt.onclick = (e) => {
+        if(e && e.stopPropagation) e.stopPropagation();
+        siteOptions.forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        requestedSite = opt.dataset.site;
+      };
+      opt.onkeydown = (e) => {
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); opt.click(); }
+      };
+    });
+    requestedSite = null;
+  }
 
-            document.getElementById('nextBalanceContainer').classList.remove('hidden');
-            document.getElementById('progressContainer').classList.remove('hidden');
+  // wire settings icon to open modal
+  if(openSettingsBtn){
+    openSettingsBtn.addEventListener('click', (e)=> openSettings(e));
+    openSettingsBtn.addEventListener('keydown', (e)=> { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSettings(e); } });
+  }
 
-            const start = new Date(now.getFullYear(), now.getMonth(), 1);
-            const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
-            const total = Math.ceil((end-start)/(1000*60*60*24));
-            const passed = Math.ceil((now-start)/(1000*60*60*24));
-            const progress = Math.min((passed/total)*100, 100);
-            
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
-            document.getElementById('nextBalanceAmount').textContent = `₦${currentUser.nextBalance.toLocaleString()}`;
-        }
+  // settings modal controls
+  settingsCancel.addEventListener('click', ()=> { settingsModal.classList.remove('active'); settingsModal.setAttribute('aria-hidden','true'); requestedSite = null; });
 
-        function checkAccountStatus() {
-            const expired = new Date() >= new Date(currentUser.expiryDate);
-            const btn = document.getElementById('depositBtn');
-            if (expired) {
-                btn.textContent = 'Activate Account';
-                btn.onclick = () => window.location.href = 'https://paystack.shop/pay/fpjpxhey-5';
-            }
-        }
+  settingsConfirm.addEventListener('click', ()=> {
+    const user = currentUser();
+    if(!user){ showToast('Login required'); settingsModal.classList.remove('active'); return; }
+    const selected = requestedSite || user.site;
+    const subject = encodeURIComponent('Booking site change request');
+    const bodyLines = [
+      `User: ${user.name}`,
+      `Current site: ${user.site}`,
+      `Requested site: ${selected}`,
+      `UTC Date: ${new Date().toUTCString()}`
+    ];
+    const body = encodeURIComponent(bodyLines.join('\n'));
+    showActionOverlay('Opening mail...');
+    setTimeout(()=>{
+      window.location.href = `mailto:${CUSTOMER_SERVICE_EMAIL}?subject=${subject}&body=${body}`;
+      settingsModal.classList.remove('active');
+      settingsModal.setAttribute('aria-hidden','true');
+      requestedSite = null;
+      setTimeout(()=> hideActionOverlay(), 800);
+    }, 300);
+  });
 
-        function isAccountActive() {
-            return new Date() < new Date(currentUser.expiryDate);
-        }
+  // Subscribe button — open provided paystack subscription link
+  subscribeBtn.addEventListener('click', ()=> {
+    showActionOverlay('Opening subscription...');
+    setTimeout(()=>{
+      try { window.open(SUBSCRIPTION_LINK, '_blank', 'noopener,noreferrer'); } catch(e) { window.location.href = SUBSCRIPTION_LINK; }
+      setTimeout(()=> hideActionOverlay(), 800);
+    }, 300);
+  });
 
-        function isTradeTimeAllowed() {
-            const now = new Date();
-            const userTradeDay = currentUser.tradeDate;
-            const currentDay = now.getUTCDate();
-            const currentHour = now.getUTCHours();
-            return currentDay === userTradeDay && currentHour >= 8 && currentHour < 10;
-        }
+  // Prevent selection on code area
+  const codeModalDisplayEl = $('#codeModalDisplay');
+  if(codeModalDisplayEl) codeModalDisplayEl.addEventListener('mousedown', e => e.preventDefault());
 
-        function updateTimerDisplay() {
-            const now = new Date();
-            const activationDate = new Date(currentUser.activationDate);
-            const expiryDate = new Date(currentUser.expiryDate);
+  // App boot
+  seedSampleUsersIfNeeded();
+  startInitialLoader();
 
-            const activationFormatted = activationDate.toLocaleString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            document.getElementById('activationDateTimeDisplay').textContent = activationFormatted;
+  // After initial loader, if session exists in-memory, set up logged-in UI but DO NOT open dashboard
+  setTimeout(()=> {
+    const user = currentUser();
+    if(user){
+      setupAfterLogin(user);
+      profileNameLarge.textContent = user.name;
+      profileImgLarge.src = SITE_LOGOS[user.site] || 'empirestatebank.png';
+      profileSiteLarge.textContent = user.site;
+      if(profileReferralCodeEl) profileReferralCodeEl.textContent = user.referral || '--';
+      if(dashboardReferralCodeEl) dashboardReferralCodeEl.textContent = user.referral || '--';
+      if(dashboardReferralCodePreviewEl) dashboardReferralCodePreviewEl.textContent = user.referral || '--';
+      if(previewPlanNameEl) previewPlanNameEl.textContent = user.planName || '--';
+      if(dashboardPlanNameEl) dashboardPlanNameEl.textContent = user.planName || '--';
+      if(profilePlanNameEl) profilePlanNameEl.textContent = user.planName || '--';
+    } else {
+      teardownAfterLogout();
+    }
+  }, 6300);
 
-            const expiryFormatted = expiryDate.toLocaleString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            document.getElementById('expiryDateTimeDisplay').textContent = expiryFormatted;
+  // Open login when header Login pressed
+  if(openLoginBtn) openLoginBtn.addEventListener('click', ()=> openLogin());
 
-            const activeDiff = now - activationDate;
-            document.getElementById('activeDays').textContent = Math.floor(activeDiff / (1000*60*60*24));
-            document.getElementById('activeHours').textContent = Math.floor((activeDiff % (1000*60*60*24)) / (1000*60*60));
-            document.getElementById('activeMinutes').textContent = Math.floor((activeDiff % (1000*60*60)) / (1000*60));
-            document.getElementById('activeSeconds').textContent = Math.floor((activeDiff % (1000*60)) / 1000);
+  // Ensure numeric PIN only
+  if(pinInput) pinInput.addEventListener('input', ()=> { pinInput.value = pinInput.value.replace(/\D/g,'').slice(0,4); });
 
-            const expiryDiff = expiryDate - now;
-            if (expiryDiff > 0) {
-                document.getElementById('expiryDays').textContent = Math.floor(expiryDiff / (1000*60*60*24));
-                document.getElementById('expiryHours').textContent = Math.floor((expiryDiff % (1000*60*60*24)) / (1000*60*60));
-                document.getElementById('expiryMinutes').textContent = Math.floor((expiryDiff % (1000*60*60)) / (1000*60));
-                document.getElementById('expirySeconds').textContent = Math.floor((expiryDiff % (1000*60)) / 1000);
-                document.getElementById('expiryWarning').style.display = Math.floor(expiryDiff / (1000*60*60*24)) <= 7 ? 'block' : 'none';
-            } else {
-                document.getElementById('expiryDays').textContent = '0';
-                document.getElementById('expiryHours').textContent = '0';
-                document.getElementById('expiryMinutes').textContent = '0';
-                document.getElementById('expirySeconds').textContent = '0';
-                document.getElementById('expiryWarning').style.display = 'block';
-            }
-        }
+  // Close profile page on outside click
+  if(profilePage) profilePage.addEventListener('click', (e)=> { if(e.target === profilePage) { profilePage.classList.remove('active'); profilePage.setAttribute('aria-hidden','true'); } });
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
+  // Close settings modal when clicking outside
+  window.addEventListener('click', (e) => {
+    if(settingsModal.classList.contains('active') && e.target === settingsModal) {
+      settingsModal.classList.remove('active');
+      settingsModal.setAttribute('aria-hidden','true');
+      requestedSite = null;
+    }
+  });
 
-        function renderWithdrawalDetails() {
-            const transaction = currentUser.lastWithdrawal;
-
-            let statusHTML = '';
-            let progressHTML = '';
-
-            if (transaction.status === 'successful') {
-                statusHTML = '<span style="color: var(--success); font-weight: 700;">✓ Successful</span>';
-                progressHTML = `
-                    <div style="margin: 20px 0;">
-                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
-                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
-                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
-                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
-                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                            <span>Payment successful</span>
-                            <span>Processing by bank</span>
-                            <span>Received by bank</span>
-                        </div>
-                    </div>
-                `;
-            } else if (transaction.status === 'pending') {
-                statusHTML = '<span style="color: var(--warning); font-weight: 700;">⏳ Pending</span>';
-                progressHTML = `
-                    <div style="margin: 20px 0;">
-                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
-                            <div style="flex: 1; height: 2px; background: var(--success); margin: 0 10px;"></div>
-                            <div style="width: 30px; height: 30px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">✓</div>
-                            <div style="flex: 1; height: 2px; background: var(--text-muted); margin: 0 10px;"></div>
-                            <div style="width: 30px; height: 30px; background: var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 700;">○</div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
-                            <span>Payment successful</span>
-                            <span>Processing by bank</span>
-                            <span>Received by bank</span>
-                        </div>
-                    </div>
-                `;
-            } else if (transaction.status === 'failed') {
-                statusHTML = '<span style="color: var(--danger); font-weight: 700;">✗ Failed</span>';
-                progressHTML = `
-                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 12px; margin: 20px 0; color: var(--danger); font-size: 12px; text-align: center;">
-                        ${transaction.failureReason || 'Transaction failed'}
-                    </div>
-                `;
-            }
-
-            const transactionDate = transaction.date.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-
-            const withdrawalHTML = `
-                <div style="text-align: center; padding: 20px 0;">
-                    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Transfer to ${currentUser.fullName}</div>
-                    <div style="font-size: 32px; font-weight: 700; color: var(--accent-green); margin-bottom: 10px;">₦${transaction.amount.toLocaleString()}.00</div>
-                    <div style="margin-bottom: 20px;">${statusHTML}</div>
-                    ${progressHTML}
-                    <div style="background: var(--primary-dark); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; margin: 20px 0; text-align: left;">
-                        <div style="margin-bottom: 12px;">
-                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">RECIPIENT DETAILS</div>
-                            <div style="font-size: 13px; font-weight: 600; color: var(--text-light); margin-bottom: 4px;">${currentUser.bankDetails.accountName}</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">${currentUser.bankDetails.bankName} | ${currentUser.bankDetails.accountNumber}</div>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-bottom: 12px;">
-                            <div style="font-size: 11px; color: var(--text-muted);">TRANSACTION NO</div>
-                            <div style="font-size: 12px; color: var(--text-light); font-family: 'Courier New', monospace;">${transaction.id}</div>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-bottom: 12px;">
-                            <div style="font-size: 11px; color: var(--text-muted);">PAYMENT METHOD</div>
-                            <div style="font-size: 12px; color: var(--text-light);">${transaction.method}</div>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
-                            <div style="font-size: 11px; color: var(--text-muted);">TRANSACTION DATE</div>
-                            <div style="font-size: 12px; color: var(--text-light);">${transactionDate}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('withdrawalDetailsContent').innerHTML = withdrawalHTML;
-            document.getElementById('withdrawalDetailsModal').classList.add('show');
-        }
-
-        function setupEventListeners() {
-            document.getElementById('profileName').addEventListener('click', () => {
-                updateTimerDisplay();
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(updateTimerDisplay, 1000);
-                document.getElementById('timerModal').classList.add('show');
-            });
-
-            document.getElementById('timerClose').addEventListener('click', () => {
-                document.getElementById('timerModal').classList.remove('show');
-                if (timerInterval) clearInterval(timerInterval);
-            });
-
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                document.getElementById('settingsContent').innerHTML = `
-                    <div class="settings-item"><span class="settings-label">Account Number</span><div class="settings-value">${currentUser.bankDetails.accountNumber || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Bank</span><div class="settings-value">${currentUser.bankDetails.bankName || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Name</span><div class="settings-value">${currentUser.bankDetails.accountName || 'N/A'}</div></div>
-                    <div class="settings-item"><span class="settings-label">Phone</span><div class="settings-value">${currentUser.bankDetails.phone || 'N/A'}</div></div>
-                `;
-                document.getElementById('settingsModal').classList.add('show');
-            });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                currentUser = null;
-                pinInput = '';
-                if (timerInterval) clearInterval(timerInterval);
-                document.getElementById('pinLockScreen').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
-            });
-
-            document.getElementById('depositBtn').addEventListener('click', () => {
-                if (new Date() < new Date(currentUser.expiryDate)) {
-                    document.getElementById('loaderOverlay').classList.add('show');
-                    setTimeout(() => { document.getElementById('loaderOverlay').classList.remove('show'); }, 6000);
-                }
-            });
-
-            document.getElementById('withdrawBtn').addEventListener('click', () => {
-                document.getElementById('withdrawPhone').value = currentUser.bankDetails.phone;
-                document.getElementById('withdrawAccountNumber').value = currentUser.bankDetails.accountNumber;
-                document.getElementById('withdrawBankName').value = currentUser.bankDetails.bankName;
-                document.getElementById('withdrawAccountName').value = currentUser.bankDetails.accountName;
-                const now = new Date();
-                const eligible = now.getUTCDay() === 1 && now.getUTCHours() >= 8 && now.getUTCHours() < 10;
-                document.getElementById('withdrawForm').querySelector('button').disabled = !eligible;
-                document.getElementById('withdrawWarning').style.display = eligible ? 'none' : 'block';
-                document.getElementById('withdrawModal').classList.add('show');
-            });
-
-            document.getElementById('tradeNowItem').addEventListener('click', () => {
-                document.getElementById('tradeAvailableDay').textContent = 'Day ' + currentUser.tradeDate;
-                const isAllowed = isTradeTimeAllowed();
-                const isActive = isAccountActive();
-                document.getElementById('tradeTimeWarning').style.display = (isAllowed && isActive) ? 'none' : 'block';
-                document.getElementById('tradeSubmitBtn').disabled = !isAllowed || !isActive;
-                document.getElementById('tradeName').value = currentUser.fullName;
-                document.getElementById('tradeDate').valueAsDate = new Date();
-                document.getElementById('tradeNowModal').classList.add('show');
-            });
-
-            document.getElementById('withdrawalRecordsItem').addEventListener('click', () => {
-                renderWithdrawalDetails();
-            });
-
-            document.getElementById('referralsItem').addEventListener('click', () => {
-                const c = currentUser.referral.count;
-                document.getElementById('referralCode').textContent = currentUser.referral.code;
-                document.getElementById('referralCountText').textContent = `${c} / 10`;
-                document.getElementById('referralFill').style.width = (c/10)*100 + '%';
-                document.getElementById('referralBonusAmount').textContent = `₦${currentUser.referral.bonus.toLocaleString()}`;
-                if (c >= 10 && !localStorage.getItem('bonus_' + currentUser.referral.code)) {
-                    currentUser.balance += currentUser.referral.bonus;
-                    localStorage.setItem('bonus_' + currentUser.referral.code, '1');
-                    updateBalance();
-                }
-                document.getElementById('referralsModal').classList.add('show');
-            });
-
-            document.getElementById('howToPlayItem').addEventListener('click', () => {
-                document.getElementById('howToPlayModal').classList.add('show');
-            });
-
-            document.getElementById('sportybetItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.sportybet));
-            document.getElementById('notificationItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.notificationCenter));
-            document.getElementById('customerServiceItem').addEventListener('click', () => window.location.href = EXTERNAL_LINKS.customerService);
-            document.getElementById('shareIdeaItem').addEventListener('click', () => window.open(EXTERNAL_LINKS.shareIdea));
-
-            document.getElementById('tradeAmount').addEventListener('input', (e) => {
-                document.getElementById('amountDisplay').textContent = '₦' + parseInt(e.target.value).toLocaleString();
-            });
-
-            document.getElementById('withdrawForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const pin = Array.from(document.querySelectorAll('.withdraw-pin')).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
-                document.getElementById('withdrawPinHidden').value = pin;
-                document.getElementById('loaderOverlay').classList.add('show');
-                setTimeout(() => document.getElementById('withdrawForm').submit(), 6000);
-            });
-
-            document.getElementById('tradeForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                if (!isAccountActive()) {
-                    alert('⚠️ Your account has expired. Please activate your account to continue trading.');
-                    closeModal('tradeNowModal');
-                    return;
-                }
-                
-                if (!isTradeTimeAllowed()) {
-                    alert('⏰ Trading is only available on Day ' + currentUser.tradeDate + ' between 08:00-10:00 UTC');
-                    return;
-                }
-                
-                const pin = Array.from(document.querySelectorAll('.trade-pin')).map(x => x.value).join('');
-                if (pin !== currentUser.pin) { alert('Wrong PIN'); return; }
-                document.getElementById('tradePinHidden').value = pin;
-                document.getElementById('loaderOverlay').classList.add('show');
-                setTimeout(() => document.getElementById('tradeForm').submit(), 6000);
-            });
-
-            document.querySelectorAll('.modal').forEach(m => {
-                m.addEventListener('click', (e) => {
-                    if (e.target === m) m.classList.remove('show');
-                });
-            });
-        }
-    </script>
+})();
+</script>
 </body>
 </html>
